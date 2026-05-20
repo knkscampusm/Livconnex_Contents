@@ -607,20 +607,14 @@ async function loadManage() {
   el.innerHTML = '<div class="empty" style="padding:30px">불러오는 중...</div>';
 
   try {
-    // contentMgmt 컬렉션 그룹으로 월 목록 수집
-    const snap = await db.collectionGroup('contents').get();
+    // contentMgmt + contentPurchases 에서 월 목록 수집
+    const [snap1, snap2] = await Promise.all([
+      db.collection('contentMgmt').get(),
+      db.collection('contentPurchases').get()
+    ]);
     const monthSet = new Set();
-    snap.docs.forEach(d => {
-      const data = d.data();
-      if (data.monthKey) monthSet.add(data.monthKey);
-    });
-
-    // collectionGroup이 안될 경우 대비: contentPurchases도 확인
-    if (monthSet.size === 0) {
-      const snap2 = await db.collection('contentPurchases').get();
-      snap2.docs.forEach(d => monthSet.add(d.id));
-    }
-
+    snap1.docs.forEach(d => monthSet.add(d.id));
+    snap2.docs.forEach(d => monthSet.add(d.id));
     mgMonths = Array.from(monthSet).sort().reverse();
 
     renderMgMonthTabs();
@@ -768,16 +762,14 @@ let studentData = {}; // sid → {ban, group, gender, seat, name}
 async function loadPrint() {
   if (!db) { document.getElementById('fb-modal').classList.add('open'); return; }
 
-  const snap = await db.collection('contentPurchases').get();
-  ptMonths = snap.docs.map(d => d.id).sort().reverse();
-
-  // 없으면 contentMgmt에서도 확인
-  if (ptMonths.length === 0) {
-    const snap2 = await db.collectionGroup('contents').get();
-    const monthSet = new Set();
-    snap2.docs.forEach(d => { if(d.data().monthKey) monthSet.add(d.data().monthKey); });
-    ptMonths = Array.from(monthSet).sort().reverse();
-  }
+  const [snap1, snap2] = await Promise.all([
+    db.collection('contentPurchases').get(),
+    db.collection('contentMgmt').get()
+  ]);
+  const monthSet = new Set();
+  snap1.docs.forEach(d => monthSet.add(d.id));
+  snap2.docs.forEach(d => monthSet.add(d.id));
+  ptMonths = Array.from(monthSet).sort().reverse();
 
   renderPtMonthTabs();
   if (ptMonths.length > 0 && !ptCurrentMonth) {
@@ -989,10 +981,6 @@ async function doPrint() {
     document.querySelector('.main').prepend(notice);
   }
 
-  // 현재 월로 기본 설정
-  const now = new Date();
-  document.getElementById('up-month').value = now.getMonth() + 1;
-  document.getElementById('up-year').value  = now.getFullYear();
 })();
 </script>
 </body>
