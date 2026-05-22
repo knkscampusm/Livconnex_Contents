@@ -586,7 +586,13 @@ function renderMgTable() {
           ${filtered.map(c => `
             <tr data-id="${c.id}" data-month="${mgCurrentMonth}">
               <td style="font-weight:500">${c.name}</td>
-              <td><span class="badge badge-gray">${c.initialCount||0}</span></td>
+              <td>${(() => {
+                const withdrawn = (c.note||'').split(',').filter(n=>n.includes('퇴원')).length;
+                const base = c.initialCount||0;
+                return withdrawn > 0
+                  ? `<span class="badge badge-gray">${base}</span> <span style="color:var(--red);font-size:11px;font-weight:700">-${withdrawn}</span>`
+                  : `<span class="badge badge-gray">${base}</span>`;
+              })()}</td>
               <td>
                 <div style="display:flex;align-items:center;gap:4px">
                   <input type="number" min="0" value="${c.inStock||0}" data-field="inStock" oninput="scheduleAutoSave(this.closest('tr'))">
@@ -695,6 +701,9 @@ async function selectContent(id) {
   else document.getElementById('buyer-preview').innerHTML = '';
 }
 
+// 현재 미리보기 buyers 캐시
+let previewBuyers = [];
+
 async function renderBuyerPreview() {
   const previewEl = document.getElementById('buyer-preview');
   previewEl.innerHTML = '<div style="color:var(--text3);font-size:12px;padding:12px">불러오는 중...</div>';
@@ -702,25 +711,109 @@ async function renderBuyerPreview() {
     db.collection('contentPurchases').doc(ptCurrentMonth).collection('students').get(),
     loadStudentsFromFirebase()
   ]);
-  const buyers = [];
+  previewBuyers = [];
   purchaseSnap.docs.forEach(d => {
     const data = d.data();
     if (!data.bought || !data.bought[ptSelectedContent.name]) return;
     const sInfo = studentMap[data.sid] || {};
-    buyers.push({ sid:data.sid, name:sInfo.name||data.name||'', ban:sInfo.ban||data.ban||'', group:sInfo.group||'', seat:sInfo.seat||'' });
+    previewBuyers.push({
+      sid: data.sid,
+      name: sInfo.name||data.name||'',
+      ban: sInfo.ban||data.ban||'',
+      group: sInfo.group||'',
+      seat: sInfo.seat||'',
+      withdrawn: sInfo.withdrawn || false
+    });
   });
-  buyers.sort((a,b) => a.group<b.group?-1:a.group>b.group?1:a.name.localeCompare(b.name,'ko'));
-  if (buyers.length === 0) { previewEl.innerHTML = '<div style="color:var(--text3);font-size:12px;padding:12px">구매 학생 없음</div>'; return; }
+  previewBuyers.sort((a,b) => a.group<b.group?-1:a.group>b.group?1:a.name.localeCompare(b.name,'ko'));
+  renderBuyerTable();
+}
+
+function renderBuyerTable() {
+  const previewEl = document.getElementById('buyer-preview');
+  if (previewBuyers.length === 0) {
+    previewEl.innerHTML = '<div style="color:var(--text3);font-size:12px;padding:12px">구매 학생 없음</div>';
+    return;
+  }
+  const withdrawnCount = previewBuyers.filter(s => s.withdrawn).length;
+  const totalLabel = withdrawnCount > 0
+    ? `총 ${previewBuyers.length}명 <span style="color:var(--red);font-size:12px;font-weight:400">(퇴원: ${withdrawnCount}명)</span>`
+    : `총 ${previewBuyers.length}명`;
+
   previewEl.innerHTML = `
     <div class="card no-print" style="margin-top:10px">
-      <div style="font-size:13px;font-weight:600;margin-bottom:10px">총 ${buyers.length}명</div>
+      <div style="font-size:13px;font-weight:600;margin-bottom:10px">${totalLabel}</div>
       <div class="tbl-wrap" style="max-height:400px">
         <table>
-          <thead><tr><th>연번</th><th>반</th><th>그룹</th><th>학번</th><th>이름</th><th>독서실</th></tr></thead>
-          <tbody>${buyers.map((s,i) => `<tr><td>${i+1}</td><td>${s.ban}</td><td>${s.group}</td><td>${s.sid}</td><td>${s.name}</td><td>${s.seat}</td></tr>`).join('')}</tbody>
+          <thead><tr><th>연번</th><th>반</th><th>그룹</th><th>학번</th><th>이름</th><th>독서실</th><th></th></tr></thead>
+          <tbody>${previewBuyers.map((s,i) => `
+            <tr style="${s.withdrawn?'background:rgba(229,83,75,0.05);':''}">
+              <td>${i+1}</td>
+              <td>${s.ban}</td>
+              <td>${s.group}</td>
+              <td>${s.sid}</td>
+              <td>${s.name}${s.withdrawn?'<span style="color:var(--red);font-size:10px;margin-left:4px">(퇴원)</span>':''}</td>
+              <td>${s.seat}</td>
+              <td>${s.withdrawn?`<button class="btn btn-danger btn-sm" onclick="markWithdrawn('${s.sid}','${s.name}')">퇴원처리</button>`:''}
+              </td>
+            </tr>`).join('')}
+          </tbody>
         </table>
       </div>
     </div>`;
+}
+
+async function markWithdrawn(sid, name) {
+  if (!ptSelectedContent) return;
+  if (!confirm(`${name}(${sid})을 퇴원 처리하시겠습니까?\n콘텐츠 비고란에 기록되고 명단에서 제외됩니다.`)) return;
+
+  const contentId = encodeId(ptSelectedContent.name);
+  const monthKey  = ptCurrentMonth;
+  const noteText  = `${name}(${sid}) 퇴원`;
+
+  try {
+    // 1) 콘텐츠 비고 업데이트
+    const ref = db.collection('contentMgmt').doc(monthKey).collection('contents').doc(contentId);
+    const snap = await ref.get();
+    const existingNote = snap.exists ? (snap.data().note || '') : '';
+    const newNote = existingNote ? existingNote + ', ' + noteText : noteText;
+
+    // initialCount -1 반영
+    const currentInitial = snap.exists ? (snap.data().initialCount || 0) : 0;
+    await ref.update({
+      note: newNote,
+      initialCount: Math.max(0, currentInitial - 1),
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+
+    // 2) 캐시 갱신
+    if (mgCache[monthKey]) {
+      const c = mgCache[monthKey].find(x => x.id === contentId);
+      if (c) { c.note = newNote; c.initialCount = Math.max(0, (c.initialCount||0) - 1); }
+    }
+
+    // 3) 명단에서 제거
+    previewBuyers = previewBuyers.filter(s => s.sid !== sid);
+    renderBuyerTable();
+
+    // 4) 콘텐츠 카드 결제인원 표시 갱신
+    updateContentCard(ptSelectedContent.id, -1);
+
+    alert(`처리 완료: ${noteText}`);
+  } catch(err) {
+    alert('처리 실패: ' + err.message);
+  }
+}
+
+function updateContentCard(contentId, delta) {
+  // ptContents 캐시 업데이트
+  const c = ptContents.find(x => x.id === contentId);
+  if (c) c.buyerCount = Math.max(0, (c.buyerCount||0) + delta);
+  if (ptCache[ptCurrentMonth]) {
+    const cc = ptCache[ptCurrentMonth].find(x => x.id === contentId);
+    if (cc) cc.buyerCount = Math.max(0, (cc.buyerCount||0) + delta);
+  }
+  renderPtContentList();
 }
 
 // 학생 데이터 Firebase에서 로드 (캐시)
@@ -739,7 +832,8 @@ async function loadStudentsFromFirebase() {
       ban: data.ban || '',
       group: data.group || '',
       gender: data.gender || '',
-      seat: data.seat || ''
+      seat: data.seat || '',
+      withdrawn: !data.enrollDate  // enrollDate 없으면 퇴원생
     };
   });
   if (statusEl) statusEl.textContent = `✓ ${snap.docs.length}명 로드됨`;
