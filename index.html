@@ -996,22 +996,64 @@ async function doPrint() {
   });
   if (pendingPrintBuyers.length === 0) { alert('구매 학생이 없습니다'); return; }
 
-  // 배부일 포맷
-  const distDate = ptSelectedContent.distributedDate || '';
-  const distLabel = distDate ? distDate.slice(5).replace('-','/') : '미정';
+  const today = new Date().toISOString().slice(0,10);
+  const c = ptSelectedContent;
+  const buyerCount = pendingPrintBuyers.length;
 
   document.getElementById('print-confirm-body').innerHTML = `
-    <div style="background:var(--surface2);border-radius:8px;padding:14px 18px;line-height:2">
-      <div><strong>${ptSelectedContent.name}</strong></div>
-      <div>배부인원 <strong>${pendingPrintBuyers.length}명</strong></div>
-      <div>배부일 <strong>${distLabel}</strong></div>
+    <div style="font-weight:700;font-size:14px;margin-bottom:14px">${c.name}</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
+      <div>
+        <div style="font-size:11px;color:var(--text2);margin-bottom:4px">입고량</div>
+        <input type="number" id="pc-instock" value="${c.inStock||buyerCount}" min="0" style="width:100%;text-align:center">
+      </div>
+      <div>
+        <div style="font-size:11px;color:var(--text2);margin-bottom:4px">입고일</div>
+        <input type="date" id="pc-instockdate" value="${c.inStockDate||today}" style="width:100%">
+      </div>
+      <div>
+        <div style="font-size:11px;color:var(--text2);margin-bottom:4px">배부량</div>
+        <input type="number" id="pc-distributed" value="${c.distributed||buyerCount}" min="0" style="width:100%;text-align:center">
+      </div>
+      <div>
+        <div style="font-size:11px;color:var(--text2);margin-bottom:4px">배부일</div>
+        <input type="date" id="pc-distributeddate" value="${c.distributedDate||today}" style="width:100%">
+      </div>
     </div>
-    <div style="font-size:13px;color:var(--text2);margin-top:12px">배부용 명단을 출력하시겠습니까?</div>`;
+    <div>
+      <div style="font-size:11px;color:var(--text2);margin-bottom:4px">비고</div>
+      <input type="text" id="pc-note" value="${c.note||''}" placeholder="비고 입력" style="width:100%">
+    </div>
+    <div style="font-size:12px;color:var(--text2);margin-top:12px">배부인원 <strong>${buyerCount}명</strong> — 배부용 명단을 출력하시겠습니까?</div>`;
   document.getElementById('print-confirm-modal').classList.add('open');
 }
 
-function confirmPrint() {
+async function confirmPrint() {
   document.getElementById('print-confirm-modal').classList.remove('open');
+
+  // 입력값 Firebase 저장
+  const inStock       = parseInt(document.getElementById('pc-instock').value) || 0;
+  const inStockDate   = document.getElementById('pc-instockdate').value;
+  const distributed   = parseInt(document.getElementById('pc-distributed').value) || 0;
+  const distDate      = document.getElementById('pc-distributeddate').value;
+  const note          = document.getElementById('pc-note').value;
+
+  try {
+    const ref = db.collection('contentMgmt').doc(ptCurrentMonth).collection('contents').doc(ptSelectedContent.id);
+    await ref.update({ inStock, inStockDate, distributed, distributedDate: distDate, note, updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
+    // 캐시 갱신
+    const c = ptContents.find(x => x.id === ptSelectedContent.id);
+    if (c) { c.inStock=inStock; c.inStockDate=inStockDate; c.distributed=distributed; c.distributedDate=distDate; c.note=note; }
+    if (ptCache[ptCurrentMonth]) {
+      const cc = ptCache[ptCurrentMonth].find(x => x.id === ptSelectedContent.id);
+      if (cc) { cc.inStock=inStock; cc.inStockDate=inStockDate; cc.distributed=distributed; cc.distributedDate=distDate; cc.note=note; }
+    }
+    if (mgCache[ptCurrentMonth]) {
+      const mc = mgCache[ptCurrentMonth].find(x => x.id === ptSelectedContent.id);
+      if (mc) { mc.inStock=inStock; mc.inStockDate=inStockDate; mc.distributed=distributed; mc.distributedDate=distDate; mc.note=note; }
+    }
+  } catch(e) { console.error('저장 실패:', e); }
+
   const cname = ptSelectedContent.name;
   pendingPrintBuyers.sort((a,b) => a.group<b.group?-1:a.group>b.group?1:a.name.localeCompare(b.name,'ko'));
   const printGroups = {};
