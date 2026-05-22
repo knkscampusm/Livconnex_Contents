@@ -169,16 +169,11 @@ tr:hover td{background:rgba(43,173,160,.03)}
     </div>
   </div>
   <div class="card no-print" style="margin-top:10px">
-    <div style="font-size:13px;font-weight:600;margin-bottom:12px;color:var(--text2)">학생 명단 파일 (별도 업로드)</div>
-    <div class="notice notice-warn">반/그룹/성별/독서실 정보가 담긴 학생 명단 엑셀을 업로드하세요.<br>컬럼: <strong>학번, 이름, 반, 그룹, 성별, 독서실</strong> (순서 무관, 헤더 있어야 함)</div>
-    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
-      <div class="upload-zone" style="flex:1;min-width:240px;padding:16px" onclick="document.getElementById('student-file').click()">
-        <input type="file" id="student-file" accept=".xlsx,.xls" style="display:none" onchange="loadStudentFile(this)">
-        <div style="font-size:13px;color:var(--text2)">📋 <strong style="color:var(--accent)">클릭</strong>하여 학생 명단 업로드</div>
-        <div id="student-file-label" style="font-size:11px;color:var(--text3);margin-top:4px"></div>
-      </div>
+    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
+      <div style="font-size:13px;font-weight:600;color:var(--text2)">학생 명단 — Firebase students 컬렉션 사용</div>
       <button class="btn btn-primary" onclick="doPrint()">🖨️ 출력</button>
     </div>
+    <div id="print-student-status" style="font-size:12px;color:var(--text3);margin-top:8px"></div>
   </div>
   <div id="print-preview"></div>
 </div>
@@ -603,7 +598,7 @@ async function saveAllMg() {
 // ── PRINT (캐시 적용) ─────────────────────
 let ptMonths = [], ptCurrentMonth = '', ptContents = [], ptSelectedContent = null;
 let ptCache = {}; // monthKey → { contents, buyers }
-let studentFileData = {};
+
 
 async function loadPrint() {
   if (!db) { document.getElementById('fb-modal').classList.add('open'); return; }
@@ -682,34 +677,42 @@ function selectContent(id) {
   renderPtContentList();
 }
 
-function loadStudentFile(input) {
-  const file = input.files[0]; if (!file) return;
-  const reader = new FileReader();
-  reader.onload = e => {
-    const wb = XLSX.read(e.target.result,{type:'array'});
-    const rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{defval:''});
-    studentFileData = {};
-    rows.forEach(row => {
-      const norm = {}; Object.keys(row).forEach(k => norm[k.trim()] = row[k]);
-      const sidKey = Object.keys(norm).find(k => k.includes('학번')||k.toLowerCase()==='sid'||k.toLowerCase()==='id');
-      const sid = sidKey ? String(norm[sidKey]).trim() : null; if (!sid) return;
-      studentFileData[sid] = { sid, name:norm['이름']||'', ban:norm['반']||'', group:norm['그룹']||'', gender:norm['성별']||'', seat:norm['독서실']||'' };
-    });
-    document.getElementById('student-file-label').textContent = `✓ ${Object.keys(studentFileData).length}명 로드됨 (${file.name})`;
-  };
-  reader.readAsArrayBuffer(file);
+// 학생 데이터 Firebase에서 로드 (캐시)
+let studentsCache = null;
+async function loadStudentsFromFirebase() {
+  if (studentsCache) return studentsCache;
+  const statusEl = document.getElementById('print-student-status');
+  if (statusEl) statusEl.textContent = '학생 정보 불러오는 중...';
+  const snap = await db.collection('students').get();
+  studentsCache = {};
+  snap.docs.forEach(d => {
+    const data = d.data();
+    studentsCache[d.id] = {
+      sid: d.id,
+      name: data.name || '',
+      ban: data.ban || '',
+      group: data.group || '',
+      gender: data.gender || '',
+      seat: data.seat || ''
+    };
+  });
+  if (statusEl) statusEl.textContent = `✓ ${snap.docs.length}명 로드됨`;
+  return studentsCache;
 }
 
 async function doPrint() {
   if (!ptSelectedContent) { alert('콘텐츠를 선택해주세요'); return; }
   if (!db) return;
-  const snap = await db.collection('contentPurchases').doc(ptCurrentMonth).collection('students').get();
+  const [purchaseSnap, studentMap] = await Promise.all([
+    db.collection('contentPurchases').doc(ptCurrentMonth).collection('students').get(),
+    loadStudentsFromFirebase()
+  ]);
   const buyers = [];
-  snap.docs.forEach(d => {
+  purchaseSnap.docs.forEach(d => {
     const data = d.data();
     if (!data.bought||!data.bought[ptSelectedContent.name]) return;
-    const sInfo = studentFileData[data.sid] || {};
-    buyers.push({ sid:data.sid, name:data.name||sInfo.name||'', ban:data.ban||sInfo.ban||'', group:sInfo.group||'', gender:sInfo.gender||'', seat:sInfo.seat||'' });
+    const sInfo = studentMap[data.sid] || {};
+    buyers.push({ sid:data.sid, name:sInfo.name||data.name||'', ban:sInfo.ban||data.ban||'', group:sInfo.group||'', gender:sInfo.gender||'', seat:sInfo.seat||'' });
   });
   if (buyers.length === 0) { alert('구매 학생이 없습니다'); return; }
   buyers.sort((a,b) => a.group<b.group?-1:a.group>b.group?1:a.name.localeCompare(b.name,'ko'));
