@@ -91,6 +91,9 @@ tr:hover td{background:rgba(43,173,160,.03)}
   .print-table td{padding:4px 7px;border:1px solid #ccc;text-align:center}
   .print-table td:nth-child(6){text-align:left}
 }
+.filter-btn{padding:5px 16px;border-radius:6px;border:1px solid var(--border);background:var(--surface2);color:var(--text2);font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;transition:all .15s}
+.filter-btn:hover{color:var(--text);border-color:var(--text2)}
+.filter-btn-active{background:rgba(43,173,160,.1);color:var(--accent);border-color:rgba(43,173,160,.35)}
 .btn-fill{background:rgba(43,173,160,.15);border:1px solid rgba(43,173,160,.3);color:var(--accent);border-radius:4px;padding:2px 8px;font-size:10px;font-weight:700;cursor:pointer;white-space:nowrap;font-family:inherit;transition:all .15s;line-height:1.4}
 .btn-fill:hover{background:var(--accent);color:#fff;border-color:var(--accent)}
 ::-webkit-scrollbar{width:5px;height:5px}
@@ -142,9 +145,14 @@ tr:hover td{background:rgba(43,173,160,.03)}
       <div class="s-title">외부 콘텐츠 관리</div>
       <div class="s-sub" style="margin-bottom:0">월별 콘텐츠 입고·배부 현황 관리</div>
     </div>
-    <button class="btn btn-ghost btn-sm" onclick="loadManage(true)">🔄 새로고침</button>
+
   </div>
   <div class="month-tabs" id="mg-month-tabs"></div>
+  <div style="display:flex;gap:6px;margin-bottom:12px">
+    <button class="filter-btn" id="mg-filter-all" onclick="setMgFilter('all')">전체</button>
+    <button class="filter-btn" id="mg-filter-distributed" onclick="setMgFilter('distributed')">배부</button>
+    <button class="filter-btn filter-btn-active" id="mg-filter-undistributed" onclick="setMgFilter('undistributed')">미배부</button>
+  </div>
   <div class="filter-row">
     <input type="text" id="mg-search" placeholder="🔍 콘텐츠명 검색..." style="flex:1;min-width:180px" oninput="renderMgTable()">
   </div>
@@ -164,6 +172,11 @@ tr:hover td{background:rgba(43,173,160,.03)}
     <div class="month-tabs" id="pt-month-tabs"></div>
   </div>
   <div class="card no-print" style="margin-top:10px">
+    <div style="display:flex;gap:6px;margin-bottom:12px">
+      <button class="filter-btn" id="pt-filter-all" onclick="setPtFilter('all')">전체</button>
+      <button class="filter-btn" id="pt-filter-distributed" onclick="setPtFilter('distributed')">배부</button>
+      <button class="filter-btn filter-btn-active" id="pt-filter-undistributed" onclick="setPtFilter('undistributed')">미배부</button>
+    </div>
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:8px">
       <div style="font-size:13px;font-weight:600;color:var(--text2)">콘텐츠 선택 <span id="pt-sel-label" style="color:var(--text3);font-size:11px;font-weight:400"></span></div>
       <input type="text" id="pt-search" placeholder="🔍 검색..." style="width:200px" oninput="renderPtContentList()">
@@ -501,6 +514,14 @@ function encodeId(name) { return name.replace(/[^a-zA-Z0-9가-힣]/g,'_').slice(
 
 // ── MANAGE (캐시 적용) ────────────────────
 let mgMonths = [], mgCurrentMonth = '', mgContents = [];
+let mgFilter = 'undistributed'; // 디폴트: 미배부
+
+function setMgFilter(f) {
+  mgFilter = f;
+  document.querySelectorAll('[id^="mg-filter-"]').forEach(b => b.classList.remove('filter-btn-active'));
+  document.getElementById('mg-filter-' + f).classList.add('filter-btn-active');
+  renderMgTable();
+}
 let mgCache = {}; // monthKey → contents[]
 
 async function loadManage(forceRefresh) {
@@ -610,7 +631,10 @@ function fillWithCurrent(rowEl) {
 function renderMgTable() {
   const el = document.getElementById('mg-content');
   const q  = document.getElementById('mg-search').value.trim().toLowerCase();
-  const filtered = q ? mgContents.filter(c => c.name.toLowerCase().includes(q)) : mgContents;
+  let filtered = mgContents;
+  if (mgFilter === 'distributed') filtered = filtered.filter(c => !!c.distributedDate);
+  if (mgFilter === 'undistributed') filtered = filtered.filter(c => !c.distributedDate);
+  if (q) filtered = filtered.filter(c => c.name.toLowerCase().includes(q));
   if (filtered.length === 0) {
     el.innerHTML = '<div class="empty"><div class="empty-icon">🔍</div>검색 결과 없음</div>';
     return;
@@ -715,6 +739,14 @@ async function savePdfUrl() {
 
 // ── PRINT (캐시 적용) ─────────────────────
 let ptMonths = [], ptCurrentMonth = '', ptContents = [], ptSelectedContent = null;
+let ptFilter = 'undistributed'; // 디폴트: 미배부
+
+function setPtFilter(f) {
+  ptFilter = f;
+  document.querySelectorAll('[id^="pt-filter-"]').forEach(b => b.classList.remove('filter-btn-active'));
+  document.getElementById('pt-filter-' + f).classList.add('filter-btn-active');
+  renderPtContentList();
+}
 let ptCache = {}; // monthKey → { contents, buyers }
 
 
@@ -780,7 +812,10 @@ async function loadPtContents(monthKey) {
 function renderPtContentList() {
   const el = document.getElementById('pt-content-list');
   const q  = document.getElementById('pt-search').value.trim().toLowerCase();
-  const list = q ? ptContents.filter(c => c.name.toLowerCase().includes(q)) : ptContents;
+  let list = ptContents;
+  if (ptFilter === 'distributed') list = list.filter(c => !!c.distributedDate);
+  if (ptFilter === 'undistributed') list = list.filter(c => !c.distributedDate);
+  if (q) list = list.filter(c => c.name.toLowerCase().includes(q));
   if (list.length === 0) { el.innerHTML = '<div style="color:var(--text3);font-size:12px;padding:10px;grid-column:1/-1">콘텐츠 없음</div>'; return; }
   const todayStr = new Date().toISOString().slice(0,10);
   el.innerHTML = list.map(c => {
