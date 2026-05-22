@@ -11,7 +11,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap');
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --bg:#f5f4f0;--surface:#ffffff;--surface2:#f0efe9;--border:#e2e0d8;
+  --bg:#ffffff;--surface:#ffffff;--surface2:#f5f5f5;--border:#e8e8e8;
   --accent:#2BADA0;--accent2:#1d8a7f;--red:#e5534b;--yellow:#f59e0b;
   --text:#1a1a18;--text2:#6b6b65;--text3:#a8a89e;
 }
@@ -147,9 +147,7 @@ tr:hover td{background:rgba(43,173,160,.03)}
   <div class="filter-row">
     <input type="text" id="mg-search" placeholder="🔍 콘텐츠명 검색..." style="flex:1;min-width:180px" oninput="renderMgTable()">
   </div>
-  <div style="display:flex;gap:10px;margin-bottom:10px;font-size:11px;align-items:center;color:var(--text2)">
-    <span style="display:inline-flex;align-items:center;gap:5px"><span style="width:7px;height:7px;border-radius:50%;background:#f59e0b;display:inline-block"></span>미배부</span>
-  </div>
+
   <div class="notice notice-info" style="font-size:11px">값을 수정하면 0.8초 후 자동 저장됩니다. 입고량·배부량 우측 <strong>=</strong> 버튼을 누르면 현재 결제인원과 동일하게 채워집니다.</div>
   <div id="mg-content">
     <div class="empty"><div class="empty-icon">📭</div>등록 탭에서 매출장을 먼저 업로드하세요</div>
@@ -597,7 +595,7 @@ function renderMgTable() {
         <tbody>
           ${filtered.map(c => `
             <tr data-id="${c.id}" data-month="${mgCurrentMonth}" style="${c.distributedDate ? '' : 'background:rgba(245,158,11,0.1);'}">
-              <td style="font-weight:500">${c.name}${!c.distributedDate?'<span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:#f59e0b;margin-left:6px;vertical-align:middle"></span>':''}</td>
+              <td style="font-weight:500">${c.name}</td>
               <td>${(() => {
                 const withdrawn = (c.note||'').split(',').filter(n=>n.includes('퇴원')).length;
                 const base = c.initialCount||0;
