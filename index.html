@@ -577,7 +577,7 @@ function renderMgTable() {
       <table class="mgmt-table">
         <thead><tr>
           <th style="min-width:220px">콘텐츠명</th>
-          <th>최초 결제인원</th><th>현재 결제인원</th>
+          <th>결제인원</th>
           <th>입고량</th><th>배부량</th><th>반품</th>
           <th>입고일</th><th>배부일</th>
           <th style="min-width:160px">비고</th>
@@ -587,7 +587,6 @@ function renderMgTable() {
             <tr data-id="${c.id}" data-month="${mgCurrentMonth}">
               <td style="font-weight:500">${c.name}</td>
               <td><span class="badge badge-gray">${c.initialCount||0}</span></td>
-              <td><input type="number" min="0" value="${c.currentCount??c.initialCount??0}" data-field="currentCount" oninput="scheduleAutoSave(this.closest('tr'))"></td>
               <td>
                 <div style="display:flex;align-items:center;gap:4px">
                   <input type="number" min="0" value="${c.inStock||0}" data-field="inStock" oninput="scheduleAutoSave(this.closest('tr'))">
