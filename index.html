@@ -310,7 +310,7 @@ function parseData(raw) {
   for (let r = 1; r < raw.length; r++) {
     const row = raw[r];
     if (!row || !row[6]) continue;
-    const sid  = String(row[6]).trim();
+    const sid  = String(row[5]).trim();  // F열(번호) = students 문서 ID
     const name = row[7] ? String(row[7]).trim() : '';
     const type = row[9] ? String(row[9]).trim() : '';
     const ban  = row[4] ? String(row[4]).trim() : '';
