@@ -766,8 +766,9 @@ async function loadPrint() {
     renderPtMonthTabs();
     if (ptMonths.length > 0 && !ptCurrentMonth) {
       ptCurrentMonth = ptMonths[ptMonths.length - 1];
-      await loadPtContents(ptCurrentMonth);
     }
+    renderPtMonthTabs(); // currentMonth 설정 후 렌더링
+    if (ptCurrentMonth) await loadPtContents(ptCurrentMonth);
   } catch(err) { console.error(err); }
 }
 
