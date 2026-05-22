@@ -100,18 +100,18 @@ tr:hover td{background:rgba(43,173,160,.03)}
 <body>
 
 <div class="header no-print">
-  <div class="logo">의대관 <span>/</span> 콘텐츠관리</div>
+  <div class="logo">외부 콘텐츠 관리</div>
   <div class="tabs">
-    <div class="tab active" onclick="switchTab('upload')">📥 콘텐츠 등록</div>
-    <div class="tab" onclick="switchTab('manage')">📋 콘텐츠 관리</div>
+    <div class="tab active" onclick="switchTab('manage')">📋 외부 콘텐츠 관리</div>
     <div class="tab" onclick="switchTab('print')">🖨️ 배부용 출력</div>
+    <div class="tab" onclick="switchTab('upload')">📥 통합매출장 업로드</div>
   </div>
 </div>
 
 <div class="main">
 
 <!-- TAB 1 -->
-<div class="panel active" id="panel-upload">
+<div class="panel" id="panel-upload">
   <div class="s-title">통합매출장 업로드</div>
   <div class="s-sub">엑셀 파일을 업로드하면 학생별 콘텐츠 구매 내역을 자동 분석합니다.<br>결제 후 취소된 항목은 미구매로 처리됩니다.</div>
   <div class="card">
@@ -135,10 +135,10 @@ tr:hover td{background:rgba(43,173,160,.03)}
 </div>
 
 <!-- TAB 2 -->
-<div class="panel" id="panel-manage">
+<div class="panel active" id="panel-manage">
   <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px;flex-wrap:wrap;gap:10px">
     <div>
-      <div class="s-title">콘텐츠 관리</div>
+      <div class="s-title">외부 콘텐츠 관리</div>
       <div class="s-sub" style="margin-bottom:0">월별 콘텐츠 입고·배부 현황 관리</div>
     </div>
     <button class="btn btn-ghost btn-sm" onclick="loadManage(true)">🔄 새로고침</button>
@@ -147,9 +147,8 @@ tr:hover td{background:rgba(43,173,160,.03)}
   <div class="filter-row">
     <input type="text" id="mg-search" placeholder="🔍 콘텐츠명 검색..." style="flex:1;min-width:180px" oninput="renderMgTable()">
   </div>
-  <div style="display:flex;gap:10px;margin-bottom:10px;font-size:11px;align-items:center">
-    <span style="display:inline-flex;align-items:center;gap:5px"><span style="width:12px;height:12px;border-radius:3px;background:var(--surface2);border:1px solid var(--border);display:inline-block"></span>배부 완료</span>
-    <span style="display:inline-flex;align-items:center;gap:5px"><span style="width:12px;height:12px;border-radius:3px;background:rgba(245,158,11,0.12);border:1px solid rgba(245,158,11,0.3);display:inline-block"></span>미배부</span>
+  <div style="display:flex;gap:10px;margin-bottom:10px;font-size:11px;align-items:center;color:var(--text2)">
+    <span style="display:inline-flex;align-items:center;gap:5px"><span style="width:7px;height:7px;border-radius:50%;background:#f59e0b;display:inline-block"></span>미배부</span>
   </div>
   <div class="notice notice-info" style="font-size:11px">값을 수정하면 0.8초 후 자동 저장됩니다. 입고량·배부량 우측 <strong>=</strong> 버튼을 누르면 현재 결제인원과 동일하게 채워집니다.</div>
   <div id="mg-content">
@@ -271,7 +270,7 @@ function saveFBConfig() {
 // ── TAB ───────────────────────────────────
 function switchTab(name) {
   document.querySelectorAll('.tab').forEach((t,i) => {
-    t.classList.toggle('active', ['upload','manage','print'][i] === name);
+    t.classList.toggle('active', ['manage','print','upload'][i] === name);
   });
   document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
   document.getElementById('panel-' + name).classList.add('active');
@@ -597,8 +596,8 @@ function renderMgTable() {
         </tr></thead>
         <tbody>
           ${filtered.map(c => `
-            <tr data-id="${c.id}" data-month="${mgCurrentMonth}" style="${c.distributedDate ? 'background:var(--surface2);' : 'background:rgba(245,158,11,0.12);'}">
-              <td style="font-weight:500">${c.name}</td>
+            <tr data-id="${c.id}" data-month="${mgCurrentMonth}" style="background:#fff">
+              <td style="font-weight:500">${c.name}${!c.distributedDate?'<span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:#f59e0b;margin-left:6px;vertical-align:middle"></span>':''}</td>
               <td>${(() => {
                 const withdrawn = (c.note||'').split(',').filter(n=>n.includes('퇴원')).length;
                 const base = c.initialCount||0;
@@ -620,7 +619,7 @@ function renderMgTable() {
               </td>
               <td><input type="number" min="0" value="${c.returned||0}" data-field="returned" oninput="scheduleAutoSave(this.closest('tr'))"></td>
               <td><input type="date" value="${c.inStockDate||''}" data-field="inStockDate" onchange="scheduleAutoSave(this.closest('tr'))"></td>
-              <td><input type="date" value="${c.distributedDate||''}" data-field="distributedDate" onchange="scheduleAutoSave(this.closest('tr'));this.closest('tr').style.background=this.value?'var(--surface2)':'rgba(245,158,11,0.12)'"></td>
+              <td><input type="date" value="${c.distributedDate||''}" data-field="distributedDate" onchange="scheduleAutoSave(this.closest('tr'));"></td>
               <td><input type="text" value="${c.note||''}" placeholder="비고" data-field="note" oninput="scheduleAutoSave(this.closest('tr'))"></td>
             </tr>`).join('')}
         </tbody>
