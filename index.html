@@ -765,10 +765,10 @@ async function doPrint() {
   const groups = {};
   buyers.forEach(s => { const g=s.group||'미배정'; if(!groups[g]) groups[g]=[]; groups[g].push(s); });
   const cname = ptSelectedContent.name;
-  const groups = {};
-  buyers.forEach(s => { const g=s.group||'미배정'; if(!groups[g]) groups[g]=[]; groups[g].push(s); });
-  document.getElementById('print-preview').innerHTML = Object.keys(groups).sort().map(g => {
-    const list = groups[g];
+  const printGroups = {};
+  buyers.forEach(s => { const g=s.group||'미배정'; if(!printGroups[g]) printGroups[g]=[]; printGroups[g].push(s); });
+  document.getElementById('print-preview').innerHTML = Object.keys(printGroups).sort().map(g => {
+    const list = printGroups[g];
     return `<div class="print-page">
       <div class="print-header">${cname} 학생에게 배부 부탁드립니다. 감사합니다.<br>
         <span style="font-size:10pt;font-weight:400">그룹: ${g} / ${list.length}명</span>
