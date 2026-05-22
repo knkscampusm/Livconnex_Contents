@@ -933,6 +933,8 @@ function confirmPrint() {
     notice.style.cssText = 'margin:0 0 12px;';
     notice.innerHTML = '⚠️ Firebase 미연결 — <a href="#" onclick="document.getElementById(\'fb-modal\').classList.add(\'open\');return false" style="color:var(--yellow);font-weight:700">설정하기</a>';
     document.querySelector('.main').prepend(notice);
+  } else {
+    loadManage();
   }
 })();
 </script>
