@@ -450,7 +450,16 @@ async function doSave() {
     msgEl.style.color = 'var(--accent)';
     msgEl.textContent = `✓ 완료! ${activeContents.length}개 콘텐츠, ${students.length}명 (${monthKey})`;
     btn.disabled = false;
-    setTimeout(() => document.getElementById('save-modal').classList.remove('open'), 2000);
+    setTimeout(() => {
+      document.getElementById('save-modal').classList.remove('open');
+      // 초기화
+      parsedData = null;
+      document.getElementById('upload-result').style.display = 'none';
+      document.getElementById('preview-thead').innerHTML = '';
+      document.getElementById('preview-tbody').innerHTML = '';
+      document.getElementById('up-label').textContent = '';
+      document.getElementById('file-input').value = '';
+    }, 1500);
   } catch(err) {
     msgEl.style.color = 'var(--red)';
     msgEl.textContent = '저장 실패: ' + err.message;
