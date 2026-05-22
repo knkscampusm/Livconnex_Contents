@@ -601,35 +601,39 @@ function renderMgTable() {
     <div class="mgmt-wrap">
       <table class="mgmt-table">
         <thead><tr>
-          <th style="min-width:220px">콘텐츠명</th>
-          <th>결제인원</th>
-          <th>입고량</th><th>배부량</th><th>반품</th>
-          <th>입고일</th><th>배부일</th>
-          <th style="min-width:160px">비고</th>
+          <th>콘텐츠명</th>
+          <th style="width:70px;text-align:center">결제인원</th>
+          <th style="width:75px;text-align:center">입고량</th>
+          <th style="width:75px;text-align:center">배부량</th>
+          <th style="width:60px;text-align:center">반품</th>
+          <th style="width:120px">입고일</th>
+          <th style="width:120px">배부일</th>
+          <th style="width:160px">비고</th>
         </tr></thead>
         <tbody>
-          ${filtered.map(c => `
+          ${filtered.map(c => {
+            const withdrawn = (c.note||'').split(',').filter(n=>n.includes('퇴원')).length;
+            const base = c.initialCount||0;
+            const countBadge = withdrawn > 0
+              ? `<span class="badge badge-gray">${base}</span><span style="color:var(--red);font-size:11px;font-weight:700;margin-left:2px">-${withdrawn}</span>`
+              : `<span class="badge badge-gray">${base}</span>`;
+            return `
             <tr data-id="${c.id}" data-month="${mgCurrentMonth}" style="${c.distributedDate ? '' : 'background:rgba(245,158,11,0.1);'}">
-              <td style="font-weight:500">${c.name}</td>
-              <td>
-                <div style="display:flex;flex-direction:column;align-items:center;gap:3px">
-                  ${(() => {
-                    const withdrawn = (c.note||'').split(',').filter(n=>n.includes('퇴원')).length;
-                    const base = c.initialCount||0;
-                    return withdrawn > 0
-                      ? `<span class="badge badge-gray">${base}</span> <span style="color:var(--red);font-size:11px;font-weight:700">-${withdrawn}</span>`
-                      : `<span class="badge badge-gray">${base}</span>`;
-                  })()}
-                  <button class="btn-fill" onclick="fillWithCurrent(this.closest('tr'))" title="입고량·배부량을 결제인원으로 채우기" style="width:100%;font-size:10px;margin-top:2px">=</button>
+              <td style="font-weight:500">
+                <div style="display:flex;align-items:center;justify-content:space-between;gap:6px">
+                  <span style="min-width:0;overflow:hidden;text-overflow:ellipsis">${c.name}</span>
+                  <button class="btn-fill" onclick="fillWithCurrent(this.closest('tr'))" title="입고량·배부량을 결제인원으로 채우기" style="flex-shrink:0">=</button>
                 </div>
               </td>
+              <td style="text-align:center">${countBadge}</td>
               <td><input type="number" min="0" value="${c.inStock||0}" data-field="inStock" oninput="scheduleAutoSave(this.closest('tr'))" style="text-align:center;width:100%"></td>
               <td><input type="number" min="0" value="${c.distributed||0}" data-field="distributed" oninput="scheduleAutoSave(this.closest('tr'))" style="text-align:center;width:100%"></td>
-              <td><input type="number" min="0" value="${c.returned||0}" data-field="returned" oninput="scheduleAutoSave(this.closest('tr'))"></td>
+              <td><input type="number" min="0" value="${c.returned||0}" data-field="returned" oninput="scheduleAutoSave(this.closest('tr'))" style="text-align:center;width:100%"></td>
               <td><input type="date" value="${c.inStockDate||''}" data-field="inStockDate" onchange="scheduleAutoSave(this.closest('tr'))"></td>
-              <td><input type="date" value="${c.distributedDate||''}" data-field="distributedDate" onchange="scheduleAutoSave(this.closest('tr'));"></td>
+              <td><input type="date" value="${c.distributedDate||''}" data-field="distributedDate" onchange="scheduleAutoSave(this.closest('tr'));this.closest('tr').style.background=this.value?'':'rgba(245,158,11,0.1)'"></td>
               <td><input type="text" value="${c.note||''}" placeholder="비고" data-field="note" oninput="scheduleAutoSave(this.closest('tr'))"></td>
-            </tr>`).join('')}
+            </tr>`;
+          }).join('')}
         </tbody>
       </table>
     </div>`;
