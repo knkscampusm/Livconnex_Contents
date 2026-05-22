@@ -604,15 +604,15 @@ function renderMgTable() {
                   : `<span class="badge badge-gray">${base}</span>`;
               })()}</td>
               <td>
-                <div style="display:flex;align-items:center;gap:4px">
-                  <input type="number" min="0" value="${c.inStock||0}" data-field="inStock" oninput="scheduleAutoSave(this.closest('tr'))" style="text-align:center">
-                  <button class="btn-fill" onclick="fillWithCurrent(this.closest('tr'),'inStock')" title="결제인원과 동일">=</button>
+                <div style="display:flex;flex-direction:column;align-items:center;gap:3px">
+                  <input type="number" min="0" value="${c.inStock||0}" data-field="inStock" oninput="scheduleAutoSave(this.closest('tr'))" style="text-align:center;width:60px">
+                  <button class="btn-fill" onclick="fillWithCurrent(this.closest('tr'),'inStock')" title="결제인원과 동일" style="width:60px;font-size:9px">= 결제인원</button>
                 </div>
               </td>
               <td>
-                <div style="display:flex;align-items:center;gap:4px">
-                  <input type="number" min="0" value="${c.distributed||0}" data-field="distributed" oninput="scheduleAutoSave(this.closest('tr'))" style="text-align:center">
-                  <button class="btn-fill" onclick="fillWithCurrent(this.closest('tr'),'distributed')" title="결제인원과 동일">=</button>
+                <div style="display:flex;flex-direction:column;align-items:center;gap:3px">
+                  <input type="number" min="0" value="${c.distributed||0}" data-field="distributed" oninput="scheduleAutoSave(this.closest('tr'))" style="text-align:center;width:60px">
+                  <button class="btn-fill" onclick="fillWithCurrent(this.closest('tr'),'distributed')" title="결제인원과 동일" style="width:60px;font-size:9px">= 결제인원</button>
                 </div>
               </td>
               <td><input type="number" min="0" value="${c.returned||0}" data-field="returned" oninput="scheduleAutoSave(this.closest('tr'))"></td>
