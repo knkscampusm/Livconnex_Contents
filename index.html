@@ -147,6 +147,10 @@ tr:hover td{background:rgba(43,173,160,.03)}
   <div class="filter-row">
     <input type="text" id="mg-search" placeholder="🔍 콘텐츠명 검색..." style="flex:1;min-width:180px" oninput="renderMgTable()">
   </div>
+  <div style="display:flex;gap:10px;margin-bottom:10px;font-size:11px;align-items:center">
+    <span style="display:inline-flex;align-items:center;gap:5px"><span style="width:12px;height:12px;border-radius:3px;background:var(--surface2);border:1px solid var(--border);display:inline-block"></span>배부 완료</span>
+    <span style="display:inline-flex;align-items:center;gap:5px"><span style="width:12px;height:12px;border-radius:3px;background:rgba(245,158,11,0.12);border:1px solid rgba(245,158,11,0.3);display:inline-block"></span>미배부</span>
+  </div>
   <div class="notice notice-info" style="font-size:11px">값을 수정하면 0.8초 후 자동 저장됩니다. 입고량·배부량 우측 <strong>=</strong> 버튼을 누르면 현재 결제인원과 동일하게 채워집니다.</div>
   <div id="mg-content">
     <div class="empty"><div class="empty-icon">📭</div>등록 탭에서 매출장을 먼저 업로드하세요</div>
@@ -475,7 +479,7 @@ async function loadManage(forceRefresh) {
       const set = new Set();
       s1.docs.forEach(d => set.add(d.id));
       s2.docs.forEach(d => set.add(d.id));
-      mgMonths = Array.from(set).sort().reverse();
+      mgMonths = Array.from(set).sort();
       if (forceRefresh) mgCache = {}; // 강제 새로고침 시 캐시 초기화
     }
 
@@ -584,7 +588,7 @@ function renderMgTable() {
         </tr></thead>
         <tbody>
           ${filtered.map(c => `
-            <tr data-id="${c.id}" data-month="${mgCurrentMonth}">
+            <tr data-id="${c.id}" data-month="${mgCurrentMonth}" style="${c.distributedDate ? 'background:var(--surface2);' : 'background:rgba(245,158,11,0.12);'}">
               <td style="font-weight:500">${c.name}</td>
               <td>${(() => {
                 const withdrawn = (c.note||'').split(',').filter(n=>n.includes('퇴원')).length;
@@ -607,7 +611,7 @@ function renderMgTable() {
               </td>
               <td><input type="number" min="0" value="${c.returned||0}" data-field="returned" oninput="scheduleAutoSave(this.closest('tr'))"></td>
               <td><input type="date" value="${c.inStockDate||''}" data-field="inStockDate" onchange="scheduleAutoSave(this.closest('tr'))"></td>
-              <td><input type="date" value="${c.distributedDate||''}" data-field="distributedDate" onchange="scheduleAutoSave(this.closest('tr'))"></td>
+              <td><input type="date" value="${c.distributedDate||''}" data-field="distributedDate" onchange="scheduleAutoSave(this.closest('tr'));this.closest('tr').style.background=this.value?'var(--surface2)':'rgba(245,158,11,0.12)'"></td>
               <td><input type="text" value="${c.note||''}" placeholder="비고" data-field="note" oninput="scheduleAutoSave(this.closest('tr'))"></td>
             </tr>`).join('')}
         </tbody>
@@ -634,7 +638,7 @@ async function loadPrint() {
     const set = new Set();
     s1.docs.forEach(d => set.add(d.id));
     s2.docs.forEach(d => set.add(d.id));
-    ptMonths = Array.from(set).sort().reverse();
+    ptMonths = Array.from(set).sort();
     renderPtMonthTabs();
     if (ptMonths.length > 0 && !ptCurrentMonth) {
       ptCurrentMonth = ptMonths[0];
