@@ -16,8 +16,6 @@
   --text:#1a1a18;--text2:#6b6b65;--text3:#a8a89e;
 }
 body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:13px}
-
-/* HEADER */
 .header{background:var(--surface);border-bottom:1px solid var(--border);padding:0 24px;height:52px;display:flex;align-items:center;gap:20px;position:sticky;top:0;z-index:100;box-shadow:0 1px 3px rgba(0,0,0,0.06)}
 .logo{font-size:15px;font-weight:800;color:var(--accent);letter-spacing:-0.3px;white-space:nowrap}
 .logo span{color:var(--text3);font-weight:400}
@@ -25,113 +23,64 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text
 .tab{padding:6px 16px;border-radius:6px;cursor:pointer;color:var(--text2);font-size:13px;font-weight:500;transition:all .15s;border:1px solid transparent;white-space:nowrap}
 .tab:hover{color:var(--text);background:var(--surface2)}
 .tab.active{color:var(--accent);background:rgba(43,173,160,.08);border-color:rgba(43,173,160,.25);font-weight:600}
-
-/* LAYOUT */
 .main{padding:20px 24px;max-width:1300px;margin:0 auto}
 .panel{display:none}.panel.active{display:block}
-
-/* CARD */
 .card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px}
 .card+.card{margin-top:12px}
-
-/* SECTION HEAD */
 .s-title{font-size:16px;font-weight:700;margin-bottom:4px}
 .s-sub{color:var(--text2);font-size:12px;line-height:1.7;margin-bottom:16px}
-
-/* FORM */
-select,input[type=text],input[type=number],input[type=date]{
-  background:var(--surface2);border:1px solid var(--border);color:var(--text);
-  padding:7px 11px;border-radius:8px;font-family:inherit;font-size:13px;outline:none;transition:border-color .15s
-}
+select,input[type=text],input[type=number],input[type=date]{background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:7px 11px;border-radius:8px;font-family:inherit;font-size:13px;outline:none;transition:border-color .15s}
 select:focus,input:focus{border-color:var(--accent);background:#fff}
-
-/* BTN */
 .btn{padding:8px 18px;border-radius:8px;border:none;cursor:pointer;font-family:inherit;font-size:13px;font-weight:600;transition:all .15s;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
 .btn-primary{background:var(--accent);color:#fff}.btn-primary:hover{background:var(--accent2)}
 .btn-ghost{background:transparent;color:var(--text2);border:1px solid var(--border)}.btn-ghost:hover{color:var(--text);border-color:var(--text2)}
-.btn-danger{background:var(--red);color:#fff}.btn-danger:hover{filter:brightness(.9)}
 .btn-sm{padding:5px 12px;font-size:12px}
-
-/* UPLOAD */
-.upload-zone{border:2px dashed var(--border);border-radius:12px;padding:36px;text-align:center;cursor:pointer;transition:all .2s;background:var(--surface);position:relative}
+.upload-zone{border:2px dashed var(--border);border-radius:12px;padding:36px;text-align:center;cursor:pointer;transition:all .2s;background:var(--surface)}
 .upload-zone:hover,.upload-zone.drag-over{border-color:var(--accent);background:rgba(43,173,160,.04)}
 .upload-zone input{display:none}
 .upload-icon{font-size:28px;margin-bottom:10px}
 .upload-text{color:var(--text2);line-height:1.8;font-size:13px}
 .upload-text strong{color:var(--accent)}
-
-/* MONTH ROW */
-.month-row{display:flex;align-items:center;gap:10px;margin-bottom:16px;padding:12px 16px;background:var(--surface2);border-radius:10px;border:1px solid var(--border)}
-.month-row label{color:var(--text2);font-weight:500;white-space:nowrap;font-size:13px}
-
-/* TABLE */
 .tbl-wrap{overflow:auto;border-radius:10px;border:1px solid var(--border);margin-top:12px}
 table{width:100%;border-collapse:collapse;font-size:12px}
 th{background:var(--surface2);color:var(--text2);font-weight:600;padding:9px 12px;text-align:left;border-bottom:1px solid var(--border);white-space:nowrap;position:sticky;top:0;z-index:2}
 td{padding:8px 12px;border-bottom:1px solid rgba(226,224,216,.5);color:var(--text);white-space:nowrap}
 tr:last-child td{border-bottom:none}
 tr:hover td{background:rgba(43,173,160,.03)}
-
-/* BADGE */
 .badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600}
 .badge-green{background:rgba(43,173,160,.12);color:var(--accent)}
-.badge-red{background:rgba(229,83,75,.12);color:var(--red)}
 .badge-gray{background:var(--surface2);color:var(--text2)}
-
-/* STATS */
-.stats-row{display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap}
-.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 18px;min-width:120px}
-.stat-label{color:var(--text3);font-size:11px;margin-bottom:3px}
-.stat-value{font-size:20px;font-weight:700;font-family:'JetBrains Mono',monospace;color:var(--accent)}
-
-/* MONTH TABS */
 .month-tabs{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:14px}
 .mtab{padding:4px 13px;border-radius:6px;cursor:pointer;font-size:12px;font-weight:600;border:1px solid var(--border);color:var(--text2);background:var(--surface);transition:all .15s}
 .mtab:hover{color:var(--text);border-color:var(--text2)}
 .mtab.active{color:var(--accent);background:rgba(43,173,160,.08);border-color:rgba(43,173,160,.35)}
-
-/* MANAGE TABLE */
 .mgmt-wrap{overflow:auto;border-radius:10px;border:1px solid var(--border)}
 .mgmt-table{width:100%;border-collapse:collapse;font-size:12px}
 .mgmt-table th{background:var(--surface2);color:var(--text2);font-weight:600;padding:9px 10px;border-bottom:1px solid var(--border);white-space:nowrap;text-align:center;position:sticky;top:0;z-index:2}
 .mgmt-table th:first-child,.mgmt-table td:first-child{text-align:left;padding-left:14px}
 .mgmt-table td{padding:7px 10px;border-bottom:1px solid rgba(226,224,216,.5);text-align:center;vertical-align:middle}
 .mgmt-table tr:hover td{background:rgba(43,173,160,.03)}
-.mgmt-table input[type=number],.mgmt-table input[type=date],.mgmt-table input[type=text]{
-  width:100%;padding:4px 7px;font-size:12px;background:transparent;border:1px solid transparent;border-radius:5px;text-align:center
-}
+.mgmt-table input[type=number],.mgmt-table input[type=date],.mgmt-table input[type=text]{width:100%;padding:4px 7px;font-size:12px;background:transparent;border:1px solid transparent;border-radius:5px;text-align:center}
 .mgmt-table input:focus{background:#fff;border-color:var(--accent);outline:none}
-
-/* PRINT SELECTOR */
 .content-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:7px;max-height:280px;overflow-y:auto;padding:2px}
 .ci{padding:9px 13px;border-radius:8px;border:1px solid var(--border);cursor:pointer;transition:all .15s;display:flex;justify-content:space-between;align-items:center;background:var(--surface2)}
 .ci:hover{border-color:var(--accent)}
 .ci.selected{border-color:var(--accent);background:rgba(43,173,160,.08)}
 .ci-name{font-size:12px;font-weight:500}
 .ci-cnt{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--accent);background:rgba(43,173,160,.12);padding:2px 7px;border-radius:4px}
-
-/* FILTER */
 .filter-row{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;align-items:center}
-
-/* EMPTY */
 .empty{text-align:center;padding:50px 20px;color:var(--text3)}
 .empty-icon{font-size:32px;margin-bottom:10px}
-
-/* NOTICE */
 .notice{padding:10px 14px;border-radius:8px;font-size:12px;line-height:1.6;margin-bottom:14px}
 .notice-info{background:rgba(43,173,160,.08);border:1px solid rgba(43,173,160,.2);color:var(--accent)}
 .notice-warn{background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.2);color:var(--yellow)}
-
-/* MODAL */
 .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;align-items:center;justify-content:center}
 .modal-overlay.open{display:flex}
 .modal{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:24px;min-width:360px;max-width:90vw;max-height:85vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.15)}
 .modal h2{font-size:15px;font-weight:700;margin-bottom:16px}
 .modal-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:18px}
-
-/* PRINT */
 @media print{
-  body{background:#fff;color:#000;font-family:'Noto Sans KR',sans-serif}
+  body{background:#fff;color:#000}
   .no-print{display:none!important}
   .print-page{page-break-after:always;padding:15mm 20mm}
   .print-page:last-child{page-break-after:auto}
@@ -139,7 +88,7 @@ tr:hover td{background:rgba(43,173,160,.03)}
   .print-table{width:100%;border-collapse:collapse;font-size:9pt}
   .print-table th{background:#f0f0f0;padding:5px 7px;border:1px solid #ccc;text-align:center;font-weight:700}
   .print-table td{padding:4px 7px;border:1px solid #ccc;text-align:center}
-  .print-table td:nth-child(2){text-align:left}
+  .print-table td:nth-child(6){text-align:left}
 }
 ::-webkit-scrollbar{width:5px;height:5px}
 ::-webkit-scrollbar-track{background:transparent}
@@ -159,11 +108,10 @@ tr:hover td{background:rgba(43,173,160,.03)}
 
 <div class="main">
 
-<!-- ===== TAB 1: 등록 ===== -->
+<!-- TAB 1 -->
 <div class="panel active" id="panel-upload">
   <div class="s-title">통합매출장 업로드</div>
   <div class="s-sub">엑셀 파일을 업로드하면 학생별 콘텐츠 구매 내역을 자동 분석합니다.<br>결제 후 취소된 항목은 미구매로 처리됩니다.</div>
-
   <div class="card">
     <div class="upload-zone" id="upload-zone">
       <input type="file" id="file-input" accept=".xlsx,.xls">
@@ -171,62 +119,55 @@ tr:hover td{background:rgba(43,173,160,.03)}
       <div class="upload-text"><strong>클릭하거나 파일을 드래그</strong>하세요<br>통합매출장 엑셀 (.xlsx, .xls)</div>
     </div>
   </div>
-
   <div id="upload-result" style="display:none">
-    <div class="card">
+    <div class="card" style="margin-top:12px">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:8px">
         <div style="font-size:13px;font-weight:600;color:var(--text2)" id="up-label"></div>
         <button class="btn btn-primary" id="btn-save" onclick="openSaveModal()">저장</button>
       </div>
       <div class="tbl-wrap" style="max-height:420px">
-        <table id="preview-table">
-          <thead id="preview-thead"></thead>
-          <tbody id="preview-tbody"></tbody>
-        </table>
+        <table><thead id="preview-thead"></thead><tbody id="preview-tbody"></tbody></table>
       </div>
     </div>
   </div>
 </div>
 
-<!-- ===== TAB 2: 관리 ===== -->
+<!-- TAB 2 -->
 <div class="panel" id="panel-manage">
   <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px;flex-wrap:wrap;gap:10px">
     <div>
       <div class="s-title">콘텐츠 관리</div>
       <div class="s-sub" style="margin-bottom:0">월별 콘텐츠 입고·배부 현황 관리</div>
     </div>
-    <button class="btn btn-ghost btn-sm" onclick="loadManage()">🔄 새로고침</button>
+    <button class="btn btn-ghost btn-sm" onclick="loadManage(true)">🔄 새로고침</button>
   </div>
   <div class="month-tabs" id="mg-month-tabs"></div>
   <div class="filter-row">
-    <input type="text" id="mg-search" placeholder="🔍 콘텐츠명 검색..." style="flex:1;min-width:180px" oninput="filterManageTable()">
+    <input type="text" id="mg-search" placeholder="🔍 콘텐츠명 검색..." style="flex:1;min-width:180px" oninput="renderMgTable()">
   </div>
-  <div class="notice notice-info" style="font-size:11px">입고량·배부량·반품·날짜·비고는 직접 수정 후 <strong>저장</strong> 버튼을 누르세요.</div>
+  <div class="notice notice-info" style="font-size:11px">입고량·배부량·반품·날짜·비고는 직접 수정 후 <strong>변경사항 저장</strong> 버튼을 누르세요.</div>
   <div id="mg-content">
     <div class="empty"><div class="empty-icon">📭</div>등록 탭에서 매출장을 먼저 업로드하세요</div>
   </div>
 </div>
 
-<!-- ===== TAB 3: 출력 ===== -->
+<!-- TAB 3 -->
 <div class="panel" id="panel-print">
   <div class="s-title no-print">배부용 출력</div>
   <div class="s-sub no-print">콘텐츠를 선택하면 구매 학생 명단을 그룹별로 출력합니다</div>
-
   <div class="card no-print">
     <div style="font-size:13px;font-weight:600;margin-bottom:10px;color:var(--text2)">월 선택</div>
     <div class="month-tabs" id="pt-month-tabs"></div>
   </div>
-
   <div class="card no-print" style="margin-top:10px">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:8px">
       <div style="font-size:13px;font-weight:600;color:var(--text2)">콘텐츠 선택 <span id="pt-sel-label" style="color:var(--text3);font-size:11px;font-weight:400"></span></div>
-      <input type="text" id="pt-search" placeholder="🔍 검색..." style="width:200px" oninput="filterPrintList()">
+      <input type="text" id="pt-search" placeholder="🔍 검색..." style="width:200px" oninput="renderPtContentList()">
     </div>
     <div class="content-grid" id="pt-content-list">
       <div style="color:var(--text3);font-size:12px;padding:20px;grid-column:1/-1;text-align:center">월을 먼저 선택하세요</div>
     </div>
   </div>
-
   <div class="card no-print" style="margin-top:10px">
     <div style="font-size:13px;font-weight:600;margin-bottom:12px;color:var(--text2)">학생 명단 파일 (별도 업로드)</div>
     <div class="notice notice-warn">반/그룹/성별/독서실 정보가 담긴 학생 명단 엑셀을 업로드하세요.<br>컬럼: <strong>학번, 이름, 반, 그룹, 성별, 독서실</strong> (순서 무관, 헤더 있어야 함)</div>
@@ -239,11 +180,10 @@ tr:hover td{background:rgba(43,173,160,.03)}
       <button class="btn btn-primary" onclick="doPrint()">🖨️ 출력</button>
     </div>
   </div>
-
   <div id="print-preview"></div>
 </div>
 
-</div><!-- /main -->
+</div>
 
 <!-- MODAL: 저장 -->
 <div class="modal-overlay" id="save-modal">
@@ -265,9 +205,7 @@ tr:hover td{background:rgba(43,173,160,.03)}
 <div class="modal-overlay" id="fb-modal">
   <div class="modal">
     <h2>🔥 Firebase 설정</h2>
-    <div style="font-size:12px;color:var(--text2);margin-bottom:14px;line-height:1.7">
-      기존 위클리팩 시스템과 같은 Firebase 프로젝트를 사용하거나 새 프로젝트를 입력하세요.
-    </div>
+    <div style="font-size:12px;color:var(--text2);margin-bottom:14px;line-height:1.7">기존 위클리팩 시스템과 같은 Firebase 프로젝트를 사용하거나 새 프로젝트를 입력하세요.</div>
     <div style="margin-bottom:10px">
       <label style="display:block;font-size:12px;color:var(--text2);margin-bottom:4px">API Key</label>
       <input type="text" id="fb-apikey" style="width:100%" placeholder="AIzaSy...">
@@ -277,12 +215,8 @@ tr:hover td{background:rgba(43,173,160,.03)}
       <input type="text" id="fb-projectid" style="width:100%" placeholder="my-project-id">
     </div>
     <div id="fb-msg" style="font-size:12px;min-height:18px;margin-bottom:8px"></div>
-    <div style="font-size:11px;color:var(--text3);margin-bottom:12px">
-      💡 기존 위클리팩과 동일한 프로젝트 사용 시 아래 버튼 클릭
-    </div>
-    <button class="btn btn-ghost btn-sm" onclick="useDefaultFB()" style="margin-bottom:12px;width:100%">
-      기존 위클리팩 Firebase 사용 (contents-1910f)
-    </button>
+    <div style="font-size:11px;color:var(--text3);margin-bottom:12px">💡 기존 위클리팩과 동일한 프로젝트 사용 시 아래 버튼 클릭</div>
+    <button class="btn btn-ghost btn-sm" onclick="useDefaultFB()" style="margin-bottom:12px;width:100%">기존 위클리팩 Firebase 사용 (contents-1910f)</button>
     <div class="modal-actions">
       <button class="btn btn-primary" onclick="saveFBConfig()">저장 및 연결</button>
     </div>
@@ -290,19 +224,13 @@ tr:hover td{background:rgba(43,173,160,.03)}
 </div>
 
 <script>
-// ─────────────────────────────────────────
-//  FIREBASE
-// ─────────────────────────────────────────
-let db = null;
-let fbConfig = null;
+// ── FIREBASE ──────────────────────────────
+let db = null, fbConfig = null;
 
 function loadFBConfig() {
   const saved = localStorage.getItem('cm_fb_config');
-  if (saved) {
-    try { fbConfig = JSON.parse(saved); initFirebase(); return true; }
-    catch(e) {}
-  }
-  return false;
+  if (!saved) return false;
+  try { fbConfig = JSON.parse(saved); initFirebase(); return true; } catch(e) { return false; }
 }
 
 function initFirebase() {
@@ -313,21 +241,19 @@ function initFirebase() {
         apiKey: fbConfig.apiKey,
         authDomain: fbConfig.projectId + '.firebaseapp.com',
         projectId: fbConfig.projectId,
-        storageBucket: fbConfig.projectId + '.appspot.com',
-        messagingSenderId: fbConfig.messagingSenderId || '',
-        appId: fbConfig.appId || ''
+        storageBucket: fbConfig.projectId + '.appspot.com'
       });
     }
     db = firebase.firestore();
-    document.getElementById('fb-msg').style.color = 'var(--accent)';
-    document.getElementById('fb-msg').textContent = '✓ 연결됨: ' + fbConfig.projectId;
-  } catch(e) {
-    console.error(e);
-  }
+    // 오프라인 캐시 활성화 → 읽기 횟수 절감
+    db.enablePersistence({ synchronizeTabs: true }).catch(() => {});
+    const msgEl = document.getElementById('fb-msg');
+    if (msgEl) { msgEl.style.color = 'var(--accent)'; msgEl.textContent = '✓ 연결됨: ' + fbConfig.projectId; }
+  } catch(e) { console.error(e); }
 }
 
 function useDefaultFB() {
-  document.getElementById('fb-apikey').value   = 'AIzaSyDrwaQk4j8MM_XRw7zN2wQiEPBZiY4Mxq8';
+  document.getElementById('fb-apikey').value    = 'AIzaSyDrwaQk4j8MM_XRw7zN2wQiEPBZiY4Mxq8';
   document.getElementById('fb-projectid').value = 'contents-1910f';
 }
 
@@ -341,13 +267,10 @@ function saveFBConfig() {
   catch(e) { document.getElementById('fb-msg').textContent = '연결 실패: ' + e.message; }
 }
 
-// ─────────────────────────────────────────
-//  TAB
-// ─────────────────────────────────────────
+// ── TAB ───────────────────────────────────
 function switchTab(name) {
   document.querySelectorAll('.tab').forEach((t,i) => {
-    const names = ['upload','manage','print'];
-    t.classList.toggle('active', names[i] === name);
+    t.classList.toggle('active', ['upload','manage','print'][i] === name);
   });
   document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
   document.getElementById('panel-' + name).classList.add('active');
@@ -355,26 +278,23 @@ function switchTab(name) {
   if (name === 'print')  loadPrint();
 }
 
-// ─────────────────────────────────────────
-//  UPLOAD & PARSE
-// ─────────────────────────────────────────
-let parsedData = null; // { month, contentNames, students }
+// ── UPLOAD & PARSE ────────────────────────
+let parsedData = null;
 
 const uploadZone = document.getElementById('upload-zone');
 const fileInput  = document.getElementById('file-input');
-
 uploadZone.addEventListener('click', () => fileInput.click());
 uploadZone.addEventListener('dragover', e => { e.preventDefault(); uploadZone.classList.add('drag-over'); });
 uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('drag-over'));
-uploadZone.addEventListener('drop', e => { e.preventDefault(); uploadZone.classList.remove('drag-over'); const f = e.dataTransfer.files[0]; if(f) processFile(f); });
+uploadZone.addEventListener('drop', e => { e.preventDefault(); uploadZone.classList.remove('drag-over'); if(e.dataTransfer.files[0]) processFile(e.dataTransfer.files[0]); });
 fileInput.addEventListener('change', e => { if(e.target.files[0]) processFile(e.target.files[0]); });
 
 function processFile(file) {
   const reader = new FileReader();
   reader.onload = e => {
     try {
-      const wb = XLSX.read(e.target.result, {type:'array'});
-      const ws = wb.Sheets[wb.SheetNames[0]];
+      const wb  = XLSX.read(e.target.result, {type:'array'});
+      const ws  = wb.Sheets[wb.SheetNames[0]];
       const raw = XLSX.utils.sheet_to_json(ws, {header:1, defval:null});
       if (!raw || raw.length < 2) { alert('데이터가 없습니다'); return; }
       parseData(raw);
@@ -385,53 +305,32 @@ function processFile(file) {
 
 function parseData(raw) {
   const header = raw[0];
-  // 고정 컬럼 인덱스
-  const COL = {
-    date:0, grade:1, dept:2, deptCat:3, ban:4, num:5,
-    sid:6, name:7, item:8, type:9, amount:16
-  };
-  // 콘텐츠 컬럼 시작 (20번째부터)
   const CONTENT_START = 20;
   const contentNames = header.slice(CONTENT_START).map(n => n ? String(n).trim() : '').filter(n => n);
   const contentCount = contentNames.length;
-
-  // 학생별 집계: key=수험번호, value={info, purchases:{콘텐츠명:결제금액합계}}
   const studentMap = {};
 
   for (let r = 1; r < raw.length; r++) {
     const row = raw[r];
-    if (!row || !row[COL.sid]) continue;
-    const sid  = String(row[COL.sid]).trim();
-    const name = row[COL.name] ? String(row[COL.name]).trim() : '';
-    const type = row[COL.type] ? String(row[COL.type]).trim() : '';
-    const ban  = row[COL.ban]  ? String(row[COL.ban]).trim() : '';
-
-    if (!studentMap[sid]) {
-      studentMap[sid] = { sid, name, ban, purchases: {} };
-    }
+    if (!row || !row[6]) continue;
+    const sid  = String(row[6]).trim();
+    const name = row[7] ? String(row[7]).trim() : '';
+    const type = row[9] ? String(row[9]).trim() : '';
+    const ban  = row[4] ? String(row[4]).trim() : '';
+    if (!studentMap[sid]) studentMap[sid] = { sid, name, ban, purchases: {} };
     const stu = studentMap[sid];
-
-    // 콘텐츠별 결제 집계
     for (let ci = 0; ci < contentCount; ci++) {
-      const colIdx = CONTENT_START + ci;
-      const val = row[colIdx];
+      const val = row[CONTENT_START + ci];
       if (val === null || val === undefined || val === '') continue;
       const amt = parseFloat(val);
       if (isNaN(amt) || amt === 0) continue;
-
       const cname = contentNames[ci];
       if (!stu.purchases[cname]) stu.purchases[cname] = { pay:0, cancel:0 };
-
-      if (type === '취소') {
-        stu.purchases[cname].cancel += Math.abs(amt);
-      } else {
-        stu.purchases[cname].pay += amt;
-      }
+      if (type === '취소') stu.purchases[cname].cancel += Math.abs(amt);
+      else stu.purchases[cname].pay += amt;
     }
   }
 
-  // 결제-취소 후 최종 구매 여부 결정
-  // 순수 결제 > 취소 → 구매, 나머지 → 미구매
   const students = Object.values(studentMap).map(stu => {
     const bought = {};
     for (const [cname, v] of Object.entries(stu.purchases)) {
@@ -447,83 +346,58 @@ function parseData(raw) {
 function renderPreview() {
   if (!parsedData) return;
   const { contentNames, students } = parsedData;
-
-  // 구매자수 집계
   const boughtCounts = {};
   contentNames.forEach(n => boughtCounts[n] = 0);
-  students.forEach(s => {
-    contentNames.forEach(n => { if (s.bought[n]) boughtCounts[n]++; });
-  });
-
-  // 구매자 있는 콘텐츠만 표시
+  students.forEach(s => { contentNames.forEach(n => { if (s.bought[n]) boughtCounts[n]++; }); });
   const activeContents = contentNames.filter(n => boughtCounts[n] > 0);
-  document.getElementById('up-label').textContent =
-    `파일 분석 완료 — ${activeContents.length}개 콘텐츠 / ${students.length}명`;
-
-  // 테이블 헤더
-  const thead = document.getElementById('preview-thead');
-  const show  = activeContents.slice(0,30);
-  thead.innerHTML = `<tr>
+  document.getElementById('up-label').textContent = `파일 분석 완료 — ${activeContents.length}개 콘텐츠 / ${students.length}명`;
+  const show = activeContents.slice(0, 30);
+  document.getElementById('preview-thead').innerHTML = `<tr>
     <th>수험번호</th><th>이름</th><th>반</th>
-    ${show.map(n => `<th title="${n}">${n.length > 12 ? n.slice(0,12)+'…' : n}<br><small style="font-weight:400;color:var(--text3)">${boughtCounts[n]}명</small></th>`).join('')}
-    ${activeContents.length > 30 ? `<th>…+${activeContents.length-30}개</th>` : ''}
+    ${show.map(n => `<th title="${n}">${n.length>12?n.slice(0,12)+'…':n}<br><small style="font-weight:400;color:var(--text3)">${boughtCounts[n]}명</small></th>`).join('')}
+    ${activeContents.length>30?`<th>…+${activeContents.length-30}개</th>`:''}
   </tr>`;
-
-  const tbody = document.getElementById('preview-tbody');
-  tbody.innerHTML = students.slice(0,100).map(s => `<tr>
+  document.getElementById('preview-tbody').innerHTML = students.slice(0,100).map(s => `<tr>
     <td>${s.sid}</td><td>${s.name}</td><td>${s.ban}</td>
-    ${show.map(n => `<td style="text-align:center">${s.bought[n] ? '<span class="badge badge-green">구매</span>' : '<span style="color:var(--text3)">—</span>'}</td>`).join('')}
-    ${activeContents.length > 30 ? '<td>…</td>' : ''}
-  </tr>`).join('');
-  if (students.length > 100) {
-    tbody.innerHTML += `<tr><td colspan="${3 + show.length + (activeContents.length>30?1:0)}" style="text-align:center;color:var(--text3);padding:10px">... 외 ${students.length-100}명 (저장 시 전체 포함)</td></tr>`;
-  }
-
+    ${show.map(n => `<td style="text-align:center">${s.bought[n]?'<span class="badge badge-green">구매</span>':'<span style="color:var(--text3)">—</span>'}</td>`).join('')}
+    ${activeContents.length>30?'<td>…</td>':''}
+  </tr>`).join('') + (students.length>100?`<tr><td colspan="${3+show.length+(activeContents.length>30?1:0)}" style="text-align:center;color:var(--text3);padding:10px">... 외 ${students.length-100}명</td></tr>`:'');
   document.getElementById('upload-result').style.display = '';
 }
 
-// ─────────────────────────────────────────
-//  SAVE MODAL & FIREBASE
-// ─────────────────────────────────────────
+// ── SAVE MODAL ────────────────────────────
 function openSaveModal() {
   if (!parsedData) return;
   if (!db) { document.getElementById('fb-modal').classList.add('open'); return; }
-
   const { contentNames, students } = parsedData;
   const boughtCounts = {};
   contentNames.forEach(n => boughtCounts[n] = 0);
   students.forEach(s => { contentNames.forEach(n => { if (s.bought[n]) boughtCounts[n]++; }); });
   const activeContents = contentNames.filter(n => boughtCounts[n] > 0);
-
-  // 월 드롭다운 생성
   const now = new Date();
-  let monthOptions = '';
+  let opts = '';
   for (let y = 2025; y <= 2027; y++) {
     for (let m = 1; m <= 12; m++) {
       const val = y + '-' + String(m).padStart(2,'0');
-      const selected = (y === now.getFullYear() && m === now.getMonth()+1) ? 'selected' : '';
-      monthOptions += `<option value="${val}" ${selected}>${y}년 ${m}월</option>`;
+      const sel = (y === now.getFullYear() && m === now.getMonth()+1) ? 'selected' : '';
+      opts += `<option value="${val}" ${sel}>${y}년 ${m}월</option>`;
     }
   }
-
-  // 콘텐츠 목록 HTML
-  const contentListHtml = activeContents.map(n =>
-    `<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 10px;border-radius:6px;background:var(--surface2);margin-bottom:4px">
-      <span style="font-size:12px">${n}</span>
-      <span class="badge badge-green">${boughtCounts[n]}명</span>
-    </div>`
-  ).join('');
-
   document.getElementById('save-modal-body').innerHTML = `
     <div style="margin-bottom:16px">
       <label style="display:block;font-size:12px;color:var(--text2);font-weight:600;margin-bottom:6px">📅 등록 월 선택</label>
-      <select id="save-month-select" style="width:100%">${monthOptions}</select>
+      <select id="save-month-select" style="width:100%">${opts}</select>
     </div>
     <div>
       <div style="font-size:12px;color:var(--text2);font-weight:600;margin-bottom:8px">📦 저장될 콘텐츠 (${activeContents.length}개)</div>
-      <div style="max-height:300px;overflow-y:auto">${contentListHtml}</div>
-    </div>
-  `;
+      <div style="max-height:300px;overflow-y:auto">
+        ${activeContents.map(n => `
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 10px;border-radius:6px;background:var(--surface2);margin-bottom:4px">
+            <span style="font-size:12px">${n}</span>
+            <span class="badge badge-green">${boughtCounts[n]}명</span>
+          </div>`).join('')}
+      </div>
+    </div>`;
   document.getElementById('save-modal-msg').textContent = '';
   document.getElementById('save-modal').classList.add('open');
 }
@@ -533,56 +407,47 @@ async function doSave() {
   const monthKey = document.getElementById('save-month-select').value;
   const { contentNames, students } = parsedData;
   const msgEl = document.getElementById('save-modal-msg');
-  const btn = document.getElementById('save-modal-btn');
-
+  const btn   = document.getElementById('save-modal-btn');
   btn.disabled = true;
   msgEl.style.color = 'var(--text2)';
   msgEl.textContent = '저장 중...';
-
   try {
     const boughtCounts = {};
     contentNames.forEach(n => boughtCounts[n] = 0);
     students.forEach(s => { contentNames.forEach(n => { if (s.bought[n]) boughtCounts[n]++; }); });
     const activeContents = contentNames.filter(n => boughtCounts[n] > 0);
 
-    // 콘텐츠 목록 저장
-    const batch1 = db.batch();
-    activeContents.forEach(cname => {
-      const ref = db.collection('contentMgmt').doc(monthKey)
-                    .collection('contents').doc(encodeContentId(cname));
-      batch1.set(ref, {
-        name: cname, monthKey,
-        initialCount: boughtCounts[cname],
-        currentCount: boughtCounts[cname],
-        inStock: 0, distributed: 0, returned: 0,
-        inStockDate: '', distributedDate: '', note: '',
-        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-      }, { merge: true });
-    });
-    await batch1.commit();
-
-    // 학생 구매 데이터 저장
-    const CHUNK = 400;
-    for (let i = 0; i < students.length; i += CHUNK) {
-      const chunk = students.slice(i, i + CHUNK);
-      const batch2 = db.batch();
-      chunk.forEach(s => {
-        const ref = db.collection('contentPurchases').doc(monthKey)
-                      .collection('students').doc(s.sid);
-        batch2.set(ref, {
-          sid: s.sid, name: s.name, ban: s.ban,
-          bought: s.bought,
-          updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-        });
+    // 콘텐츠 목록 저장 (500개 배치 제한)
+    for (let i = 0; i < activeContents.length; i += 490) {
+      const chunk = activeContents.slice(i, i + 490);
+      const batch = db.batch();
+      chunk.forEach(cname => {
+        const ref = db.collection('contentMgmt').doc(monthKey).collection('contents').doc(encodeId(cname));
+        batch.set(ref, { name:cname, monthKey, initialCount:boughtCounts[cname], currentCount:boughtCounts[cname], inStock:0, distributed:0, returned:0, inStockDate:'', distributedDate:'', note:'', updatedAt:firebase.firestore.FieldValue.serverTimestamp() }, { merge:true });
       });
-      await batch2.commit();
+      await batch.commit();
+    }
+
+    // 학생 데이터 저장
+    const CHUNK = 490;
+    for (let i = 0; i < students.length; i += CHUNK) {
+      const batch = db.batch();
+      students.slice(i, i + CHUNK).forEach(s => {
+        const ref = db.collection('contentPurchases').doc(monthKey).collection('students').doc(s.sid);
+        batch.set(ref, { sid:s.sid, name:s.name, ban:s.ban, bought:s.bought, updatedAt:firebase.firestore.FieldValue.serverTimestamp() });
+      });
+      await batch.commit();
       msgEl.textContent = `저장 중... ${Math.min(i+CHUNK, students.length)}/${students.length}명`;
     }
+
+    // 캐시 무효화
+    mgCache = {};
+    ptCache = {};
 
     msgEl.style.color = 'var(--accent)';
     msgEl.textContent = `✓ 완료! ${activeContents.length}개 콘텐츠, ${students.length}명 (${monthKey})`;
     btn.disabled = false;
-    setTimeout(() => document.getElementById('save-modal').classList.remove('open'), 1800);
+    setTimeout(() => document.getElementById('save-modal').classList.remove('open'), 2000);
   } catch(err) {
     msgEl.style.color = 'var(--red)';
     msgEl.textContent = '저장 실패: ' + err.message;
@@ -590,53 +455,48 @@ async function doSave() {
   }
 }
 
-function encodeContentId(name) {
-  return name.replace(/[^a-zA-Z0-9가-힣]/g, '_').slice(0, 100);
-}
+function encodeId(name) { return name.replace(/[^a-zA-Z0-9가-힣]/g,'_').slice(0,100); }
 
-// ─────────────────────────────────────────
-//  MANAGE
-// ─────────────────────────────────────────
-let mgMonths = [];
-let mgCurrentMonth = '';
-let mgContents = [];
+// ── MANAGE (캐시 적용) ────────────────────
+let mgMonths = [], mgCurrentMonth = '', mgContents = [];
+let mgCache = {}; // monthKey → contents[]
 
-async function loadManage() {
+async function loadManage(forceRefresh) {
   if (!db) { document.getElementById('fb-modal').classList.add('open'); return; }
   const el = document.getElementById('mg-content');
   el.innerHTML = '<div class="empty" style="padding:30px">불러오는 중...</div>';
 
   try {
-    // contentMgmt + contentPurchases 에서 월 목록 수집
-    const [snap1, snap2] = await Promise.all([
-      db.collection('contentMgmt').get(),
-      db.collection('contentPurchases').get()
-    ]);
-    const monthSet = new Set();
-    snap1.docs.forEach(d => monthSet.add(d.id));
-    snap2.docs.forEach(d => monthSet.add(d.id));
-    mgMonths = Array.from(monthSet).sort().reverse();
+    // 월 목록은 캐시 없으면 한 번만 조회
+    if (forceRefresh || mgMonths.length === 0) {
+      const [s1, s2] = await Promise.all([
+        db.collection('contentMgmt').get(),
+        db.collection('contentPurchases').get()
+      ]);
+      const set = new Set();
+      s1.docs.forEach(d => set.add(d.id));
+      s2.docs.forEach(d => set.add(d.id));
+      mgMonths = Array.from(set).sort().reverse();
+      if (forceRefresh) mgCache = {}; // 강제 새로고침 시 캐시 초기화
+    }
 
     renderMgMonthTabs();
     if (mgMonths.length === 0) {
       el.innerHTML = '<div class="empty"><div class="empty-icon">📭</div>등록된 데이터가 없습니다</div>';
       return;
     }
-    if (!mgCurrentMonth || !mgMonths.includes(mgCurrentMonth)) {
-      mgCurrentMonth = mgMonths[0];
-    }
+    if (!mgCurrentMonth || !mgMonths.includes(mgCurrentMonth)) mgCurrentMonth = mgMonths[0];
     await loadMgTable(mgCurrentMonth);
   } catch(err) {
-    el.innerHTML = `<div class="empty" style="color:var(--red)">오류: ${err.message}<br><small>콘솔(F12)에서 자세한 내용 확인</small></div>`;
+    el.innerHTML = `<div class="empty" style="color:var(--red)">오류: ${err.message}</div>`;
     console.error(err);
   }
 }
 
 function renderMgMonthTabs() {
-  const el = document.getElementById('mg-month-tabs');
-  el.innerHTML = mgMonths.map(m => `
-    <div class="mtab ${m === mgCurrentMonth ? 'active' : ''}" onclick="setMgMonth('${m}')">${m}</div>
-  `).join('');
+  document.getElementById('mg-month-tabs').innerHTML = mgMonths.map(m =>
+    `<div class="mtab ${m===mgCurrentMonth?'active':''}" onclick="setMgMonth('${m}')">${m}</div>`
+  ).join('');
 }
 
 async function setMgMonth(m) {
@@ -647,147 +507,129 @@ async function setMgMonth(m) {
 
 async function loadMgTable(monthKey) {
   const el = document.getElementById('mg-content');
-  el.innerHTML = '<div style="color:var(--text3);padding:10px">불러오는 중...</div>';
+  el.innerHTML = '<div style="color:var(--text3);padding:10px;font-size:12px">불러오는 중...</div>';
 
-  const snap = await db.collection('contentMgmt').doc(monthKey).collection('contents').orderBy('name').get();
-  mgContents = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-  renderMgTable();
+  // 캐시 확인
+  if (mgCache[monthKey]) {
+    mgContents = mgCache[monthKey];
+    renderMgTable();
+    return;
+  }
+
+  try {
+    const snap = await db.collection('contentMgmt').doc(monthKey).collection('contents').orderBy('name').get();
+    mgContents = snap.docs.map(d => ({ id:d.id, ...d.data() }));
+    mgCache[monthKey] = mgContents; // 캐시 저장
+    renderMgTable();
+  } catch(err) {
+    el.innerHTML = `<div class="empty" style="color:var(--red)">오류: ${err.message}</div>`;
+  }
 }
 
 function renderMgTable() {
   const el = document.getElementById('mg-content');
-  const q = document.getElementById('mg-search').value.trim().toLowerCase();
+  const q  = document.getElementById('mg-search').value.trim().toLowerCase();
   const filtered = q ? mgContents.filter(c => c.name.toLowerCase().includes(q)) : mgContents;
-
   if (filtered.length === 0) {
     el.innerHTML = '<div class="empty"><div class="empty-icon">🔍</div>검색 결과 없음</div>';
     return;
   }
-
   el.innerHTML = `
     <div style="display:flex;justify-content:flex-end;margin-bottom:8px">
-      <button class="btn btn-primary btn-sm" onclick="saveAllMg()">💾 변경 사항 저장</button>
+      <button class="btn btn-primary btn-sm" onclick="saveAllMg()">💾 변경사항 저장</button>
     </div>
     <div class="mgmt-wrap">
       <table class="mgmt-table">
-        <thead>
-          <tr>
-            <th style="min-width:220px">콘텐츠명</th>
-            <th>최초 결제인원</th>
-            <th>현재 결제인원</th>
-            <th>입고량</th>
-            <th>배부량</th>
-            <th>반품</th>
-            <th>입고일</th>
-            <th>배부일</th>
-            <th style="min-width:160px">비고</th>
-          </tr>
-        </thead>
+        <thead><tr>
+          <th style="min-width:220px">콘텐츠명</th>
+          <th>최초 결제인원</th><th>현재 결제인원</th>
+          <th>입고량</th><th>배부량</th><th>반품</th>
+          <th>입고일</th><th>배부일</th>
+          <th style="min-width:160px">비고</th>
+        </tr></thead>
         <tbody>
-          ${filtered.map((c,i) => `
+          ${filtered.map(c => `
             <tr data-id="${c.id}" data-month="${mgCurrentMonth}">
-              <td style="text-align:left;font-weight:500">${c.name}</td>
-              <td><span class="badge badge-gray">${c.initialCount || 0}</span></td>
-              <td><input type="number" min="0" value="${c.currentCount ?? c.initialCount ?? 0}" data-field="currentCount"></td>
-              <td><input type="number" min="0" value="${c.inStock || 0}" data-field="inStock"></td>
-              <td><input type="number" min="0" value="${c.distributed || 0}" data-field="distributed"></td>
-              <td><input type="number" min="0" value="${c.returned || 0}" data-field="returned"></td>
-              <td><input type="date" value="${c.inStockDate || ''}" data-field="inStockDate"></td>
-              <td><input type="date" value="${c.distributedDate || ''}" data-field="distributedDate"></td>
-              <td><input type="text" value="${c.note || ''}" placeholder="비고" data-field="note"></td>
-            </tr>
-          `).join('')}
+              <td style="font-weight:500">${c.name}</td>
+              <td><span class="badge badge-gray">${c.initialCount||0}</span></td>
+              <td><input type="number" min="0" value="${c.currentCount??c.initialCount??0}" data-field="currentCount"></td>
+              <td><input type="number" min="0" value="${c.inStock||0}" data-field="inStock"></td>
+              <td><input type="number" min="0" value="${c.distributed||0}" data-field="distributed"></td>
+              <td><input type="number" min="0" value="${c.returned||0}" data-field="returned"></td>
+              <td><input type="date" value="${c.inStockDate||''}" data-field="inStockDate"></td>
+              <td><input type="date" value="${c.distributedDate||''}" data-field="distributedDate"></td>
+              <td><input type="text" value="${c.note||''}" placeholder="비고" data-field="note"></td>
+            </tr>`).join('')}
         </tbody>
       </table>
-    </div>
-  `;
+    </div>`;
 }
-
-function filterManageTable() { renderMgTable(); }
 
 async function saveAllMg() {
   if (!db) return;
   const rows = document.querySelectorAll('.mgmt-table tbody tr[data-id]');
   if (!rows.length) return;
-
   const btn = document.querySelector('[onclick="saveAllMg()"]');
-  btn.disabled = true;
-  btn.textContent = '저장 중...';
-
+  btn.disabled = true; btn.textContent = '저장 중...';
   try {
     const batch = db.batch();
     rows.forEach(row => {
-      const id = row.dataset.id;
-      const monthKey = row.dataset.month;
-      const ref = db.collection('contentMgmt').doc(monthKey).collection('contents').doc(id);
+      const ref = db.collection('contentMgmt').doc(row.dataset.month).collection('contents').doc(row.dataset.id);
       const updates = { updatedAt: firebase.firestore.FieldValue.serverTimestamp() };
       row.querySelectorAll('[data-field]').forEach(inp => {
-        const field = inp.dataset.field;
-        const val = inp.type === 'number' ? (parseInt(inp.value) || 0) : inp.value;
-        updates[field] = val;
+        updates[inp.dataset.field] = inp.type==='number' ? (parseInt(inp.value)||0) : inp.value;
       });
       batch.update(ref, updates);
     });
     await batch.commit();
-
-    // 로컬 데이터 업데이트
+    // 캐시 갱신
     rows.forEach(row => {
-      const id = row.dataset.id;
-      const c = mgContents.find(x => x.id === id);
-      if (c) {
-        row.querySelectorAll('[data-field]').forEach(inp => {
-          c[inp.dataset.field] = inp.type === 'number' ? (parseInt(inp.value) || 0) : inp.value;
-        });
-      }
+      const c = mgContents.find(x => x.id === row.dataset.id);
+      if (c) row.querySelectorAll('[data-field]').forEach(inp => { c[inp.dataset.field] = inp.type==='number'?(parseInt(inp.value)||0):inp.value; });
     });
-
+    if (mgCurrentMonth) mgCache[mgCurrentMonth] = [...mgContents];
     btn.textContent = '✓ 저장됨';
-    setTimeout(() => { btn.disabled = false; btn.innerHTML = '💾 변경 사항 저장'; }, 1500);
+    setTimeout(() => { btn.disabled=false; btn.innerHTML='💾 변경사항 저장'; }, 1500);
   } catch(err) {
     alert('저장 실패: ' + err.message);
-    btn.disabled = false;
-    btn.innerHTML = '💾 변경 사항 저장';
+    btn.disabled=false; btn.innerHTML='💾 변경사항 저장';
   }
 }
 
-// ─────────────────────────────────────────
-//  PRINT
-// ─────────────────────────────────────────
-let ptMonths = [];
-let ptCurrentMonth = '';
-let ptContents = [];
-let ptSelectedContent = null;
-let studentData = {}; // sid → {ban, group, gender, seat, name}
+// ── PRINT (캐시 적용) ─────────────────────
+let ptMonths = [], ptCurrentMonth = '', ptContents = [], ptSelectedContent = null;
+let ptCache = {}; // monthKey → { contents, buyers }
+let studentFileData = {};
 
 async function loadPrint() {
   if (!db) { document.getElementById('fb-modal').classList.add('open'); return; }
+  if (ptMonths.length > 0) { renderPtMonthTabs(); return; } // 이미 로드된 경우 재조회 안함
 
-  const [snap1, snap2] = await Promise.all([
-    db.collection('contentPurchases').get(),
-    db.collection('contentMgmt').get()
-  ]);
-  const monthSet = new Set();
-  snap1.docs.forEach(d => monthSet.add(d.id));
-  snap2.docs.forEach(d => monthSet.add(d.id));
-  ptMonths = Array.from(monthSet).sort().reverse();
-
-  renderPtMonthTabs();
-  if (ptMonths.length > 0 && !ptCurrentMonth) {
-    ptCurrentMonth = ptMonths[0];
-    await loadPtContents(ptCurrentMonth);
-  }
+  try {
+    const [s1, s2] = await Promise.all([
+      db.collection('contentPurchases').get(),
+      db.collection('contentMgmt').get()
+    ]);
+    const set = new Set();
+    s1.docs.forEach(d => set.add(d.id));
+    s2.docs.forEach(d => set.add(d.id));
+    ptMonths = Array.from(set).sort().reverse();
+    renderPtMonthTabs();
+    if (ptMonths.length > 0 && !ptCurrentMonth) {
+      ptCurrentMonth = ptMonths[0];
+      await loadPtContents(ptCurrentMonth);
+    }
+  } catch(err) { console.error(err); }
 }
 
 function renderPtMonthTabs() {
-  const el = document.getElementById('pt-month-tabs');
-  el.innerHTML = ptMonths.map(m => `
-    <div class="mtab ${m === ptCurrentMonth ? 'active' : ''}" onclick="setPtMonth('${m}')">${m}</div>
-  `).join('') || '<div style="color:var(--text3);font-size:12px">등록된 데이터 없음</div>';
+  document.getElementById('pt-month-tabs').innerHTML = ptMonths.map(m =>
+    `<div class="mtab ${m===ptCurrentMonth?'active':''}" onclick="setPtMonth('${m}')">${m}</div>`
+  ).join('') || '<div style="color:var(--text3);font-size:12px">등록된 데이터 없음</div>';
 }
 
 async function setPtMonth(m) {
-  ptCurrentMonth = m;
-  ptSelectedContent = null;
+  ptCurrentMonth = m; ptSelectedContent = null;
   renderPtMonthTabs();
   await loadPtContents(m);
 }
@@ -796,87 +638,60 @@ async function loadPtContents(monthKey) {
   const el = document.getElementById('pt-content-list');
   el.innerHTML = '<div style="color:var(--text3);font-size:12px;padding:10px;grid-column:1/-1">불러오는 중...</div>';
 
-  // 콘텐츠 목록 + 구매자 수
-  const [mgSnap, purSnap] = await Promise.all([
-    db.collection('contentMgmt').doc(monthKey).collection('contents').orderBy('name').get(),
-    db.collection('contentPurchases').doc(monthKey).collection('students').get()
-  ]);
+  // 캐시 확인
+  if (ptCache[monthKey]) {
+    ptContents = ptCache[monthKey];
+    renderPtContentList();
+    return;
+  }
 
-  // 구매자수 집계
-  const boughtCounts = {};
-  purSnap.docs.forEach(d => {
-    const bought = d.data().bought || {};
-    Object.entries(bought).forEach(([cname, v]) => {
-      if (v) boughtCounts[cname] = (boughtCounts[cname] || 0) + 1;
+  try {
+    const [mgSnap, purSnap] = await Promise.all([
+      db.collection('contentMgmt').doc(monthKey).collection('contents').orderBy('name').get(),
+      db.collection('contentPurchases').doc(monthKey).collection('students').get()
+    ]);
+    const boughtCounts = {};
+    purSnap.docs.forEach(d => {
+      Object.entries(d.data().bought||{}).forEach(([k,v]) => { if(v) boughtCounts[k]=(boughtCounts[k]||0)+1; });
     });
-  });
-
-  ptContents = mgSnap.docs.map(d => ({
-    id: d.id, ...d.data(),
-    buyerCount: boughtCounts[d.data().name] || 0
-  }));
-
-  renderPtContentList();
+    ptContents = mgSnap.docs.map(d => ({ id:d.id, ...d.data(), buyerCount:boughtCounts[d.data().name]||0 }));
+    ptCache[monthKey] = ptContents;
+    renderPtContentList();
+  } catch(err) { console.error(err); }
 }
 
 function renderPtContentList() {
   const el = document.getElementById('pt-content-list');
-  const q = document.getElementById('pt-search').value.trim().toLowerCase();
+  const q  = document.getElementById('pt-search').value.trim().toLowerCase();
   const list = q ? ptContents.filter(c => c.name.toLowerCase().includes(q)) : ptContents;
-
-  if (list.length === 0) {
-    el.innerHTML = '<div style="color:var(--text3);font-size:12px;padding:10px;grid-column:1/-1">콘텐츠 없음</div>';
-    return;
-  }
+  if (list.length === 0) { el.innerHTML = '<div style="color:var(--text3);font-size:12px;padding:10px;grid-column:1/-1">콘텐츠 없음</div>'; return; }
   el.innerHTML = list.map(c => `
-    <div class="ci ${ptSelectedContent && ptSelectedContent.id === c.id ? 'selected' : ''}"
-         onclick="selectContent('${c.id}')">
+    <div class="ci ${ptSelectedContent&&ptSelectedContent.id===c.id?'selected':''}" onclick="selectContent('${c.id}')">
       <div class="ci-name">${c.name}</div>
       <div class="ci-cnt">${c.buyerCount}명</div>
-    </div>
-  `).join('');
+    </div>`).join('');
 }
 
-function filterPrintList() { renderPtContentList(); }
-
 function selectContent(id) {
-  ptSelectedContent = ptContents.find(c => c.id === id) || null;
-  document.getElementById('pt-sel-label').textContent =
-    ptSelectedContent ? `선택: ${ptSelectedContent.name}` : '';
+  ptSelectedContent = ptContents.find(c => c.id===id) || null;
+  document.getElementById('pt-sel-label').textContent = ptSelectedContent ? `선택: ${ptSelectedContent.name}` : '';
   renderPtContentList();
 }
 
-// 학생 파일 업로드
-let studentFileData = {}; // sid → row data
-
 function loadStudentFile(input) {
-  const file = input.files[0];
-  if (!file) return;
+  const file = input.files[0]; if (!file) return;
   const reader = new FileReader();
   reader.onload = e => {
-    const wb = XLSX.read(e.target.result, {type:'array'});
-    const ws = wb.Sheets[wb.SheetNames[0]];
-    const rows = XLSX.utils.sheet_to_json(ws, {defval:''});
+    const wb = XLSX.read(e.target.result,{type:'array'});
+    const rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{defval:''});
     studentFileData = {};
     rows.forEach(row => {
-      // 컬럼명 정규화 (앞뒤 공백 제거)
-      const norm = {};
-      Object.keys(row).forEach(k => norm[k.trim()] = row[k]);
-      // 학번 찾기
-      const sidKey = Object.keys(norm).find(k => k.includes('학번') || k.toLowerCase() === 'sid' || k.toLowerCase() === 'id');
-      const sid = sidKey ? String(norm[sidKey]).trim() : null;
-      if (!sid) return;
-      studentFileData[sid] = {
-        sid,
-        name:   norm['이름'] || norm['name'] || '',
-        ban:    norm['반']   || norm['class'] || '',
-        group:  norm['그룹'] || norm['group'] || '',
-        gender: norm['성별'] || norm['gender'] || '',
-        seat:   norm['독서실'] || norm['seat'] || ''
-      };
+      const norm = {}; Object.keys(row).forEach(k => norm[k.trim()] = row[k]);
+      const sidKey = Object.keys(norm).find(k => k.includes('학번')||k.toLowerCase()==='sid'||k.toLowerCase()==='id');
+      const sid = sidKey ? String(norm[sidKey]).trim() : null; if (!sid) return;
+      studentFileData[sid] = { sid, name:norm['이름']||'', ban:norm['반']||'', group:norm['그룹']||'', gender:norm['성별']||'', seat:norm['독서실']||'' };
     });
-    const cnt = Object.keys(studentFileData).length;
-    document.getElementById('student-file-label').textContent = `✓ ${cnt}명 로드됨 (${file.name})`;
+    document.getElementById('student-file-label').textContent = `✓ ${Object.keys(studentFileData).length}명 로드됨 (${file.name})`;
   };
   reader.readAsArrayBuffer(file);
 }
@@ -884,103 +699,43 @@ function loadStudentFile(input) {
 async function doPrint() {
   if (!ptSelectedContent) { alert('콘텐츠를 선택해주세요'); return; }
   if (!db) return;
-
-  // 구매자 목록 가져오기
-  const snap = await db.collection('contentPurchases').doc(ptCurrentMonth)
-                       .collection('students').get();
-
+  const snap = await db.collection('contentPurchases').doc(ptCurrentMonth).collection('students').get();
   const buyers = [];
   snap.docs.forEach(d => {
     const data = d.data();
-    if (!data.bought || !data.bought[ptSelectedContent.name]) return;
-    const sid = data.sid;
-    const sInfo = studentFileData[sid] || {};
-    buyers.push({
-      sid,
-      name:   data.name || sInfo.name || '',
-      ban:    data.ban  || sInfo.ban  || '',
-      group:  sInfo.group  || '',
-      gender: sInfo.gender || '',
-      seat:   sInfo.seat   || ''
-    });
+    if (!data.bought||!data.bought[ptSelectedContent.name]) return;
+    const sInfo = studentFileData[data.sid] || {};
+    buyers.push({ sid:data.sid, name:data.name||sInfo.name||'', ban:data.ban||sInfo.ban||'', group:sInfo.group||'', gender:sInfo.gender||'', seat:sInfo.seat||'' });
   });
-
   if (buyers.length === 0) { alert('구매 학생이 없습니다'); return; }
-
-  // 그룹별 정렬 및 분류
-  buyers.sort((a, b) => {
-    if (a.group < b.group) return -1;
-    if (a.group > b.group) return 1;
-    return a.name.localeCompare(b.name, 'ko');
-  });
-
-  // 그룹별 분리
+  buyers.sort((a,b) => a.group<b.group?-1:a.group>b.group?1:a.name.localeCompare(b.name,'ko'));
   const groups = {};
-  buyers.forEach(s => {
-    const g = s.group || '미배정';
-    if (!groups[g]) groups[g] = [];
-    groups[g].push(s);
-  });
-
+  buyers.forEach(s => { const g=s.group||'미배정'; if(!groups[g]) groups[g]=[]; groups[g].push(s); });
   const cname = ptSelectedContent.name;
-  const preview = document.getElementById('print-preview');
-
-  let html = '';
-  Object.keys(groups).sort().forEach(g => {
+  document.getElementById('print-preview').innerHTML = Object.keys(groups).sort().map(g => {
     const list = groups[g];
-    html += `<div class="print-page">
-      <div class="print-header">
-        ${cname} 학생에게 배부 부탁드립니다. 감사합니다.<br>
+    return `<div class="print-page">
+      <div class="print-header">${cname} 학생에게 배부 부탁드립니다. 감사합니다.<br>
         <span style="font-size:10pt;font-weight:400">그룹: ${g} / ${list.length}명</span>
       </div>
       <table class="print-table">
-        <thead>
-          <tr>
-            <th style="width:40px">연번</th>
-            <th style="width:50px">반</th>
-            <th style="width:50px">그룹</th>
-            <th style="width:40px">성별</th>
-            <th style="width:80px">학번</th>
-            <th>이름</th>
-            <th>독서실</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${list.map((s, i) => `
-            <tr>
-              <td>${i + 1}</td>
-              <td>${s.ban}</td>
-              <td>${s.group}</td>
-              <td>${s.gender}</td>
-              <td>${s.sid}</td>
-              <td style="text-align:left;padding-left:8px">${s.name}</td>
-              <td>${s.seat}</td>
-            </tr>
-          `).join('')}
-        </tbody>
+        <thead><tr><th style="width:40px">연번</th><th style="width:50px">반</th><th style="width:50px">그룹</th><th style="width:40px">성별</th><th style="width:80px">학번</th><th>이름</th><th>독서실</th></tr></thead>
+        <tbody>${list.map((s,i) => `<tr><td>${i+1}</td><td>${s.ban}</td><td>${s.group}</td><td>${s.gender}</td><td>${s.sid}</td><td>${s.name}</td><td>${s.seat}</td></tr>`).join('')}</tbody>
       </table>
     </div>`;
-  });
-
-  preview.innerHTML = html;
-
-  // 인쇄
+  }).join('');
   window.print();
 }
 
-// ─────────────────────────────────────────
-//  INIT
-// ─────────────────────────────────────────
+// ── INIT ──────────────────────────────────
 (function init() {
   if (!loadFBConfig()) {
-    // Firebase 미설정 시 알림 (자동으로 모달 열지 않음 — 저장 시점에 열림)
     const notice = document.createElement('div');
     notice.className = 'notice notice-warn no-print';
     notice.style.cssText = 'margin:0 0 12px;';
     notice.innerHTML = '⚠️ Firebase 미연결 — <a href="#" onclick="document.getElementById(\'fb-modal\').classList.add(\'open\');return false" style="color:var(--yellow);font-weight:700">설정하기</a>';
     document.querySelector('.main').prepend(notice);
   }
-
 })();
 </script>
 </body>
