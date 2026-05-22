@@ -90,8 +90,8 @@ tr:hover td{background:rgba(43,173,160,.03)}
   .print-table td{padding:4px 7px;border:1px solid #ccc;text-align:center}
   .print-table td:nth-child(6){text-align:left}
 }
-.btn-fill{background:var(--surface2);border:1px solid var(--border);color:var(--text2);border-radius:4px;padding:2px 6px;font-size:10px;cursor:pointer;white-space:nowrap;font-family:inherit;transition:all .15s;line-height:1.4}
-.btn-fill:hover{background:rgba(43,173,160,.1);border-color:var(--accent);color:var(--accent)}
+.btn-fill{background:rgba(43,173,160,.15);border:1px solid rgba(43,173,160,.3);color:var(--accent);border-radius:4px;padding:2px 8px;font-size:10px;font-weight:700;cursor:pointer;white-space:nowrap;font-family:inherit;transition:all .15s;line-height:1.4}
+.btn-fill:hover{background:var(--accent);color:#fff;border-color:var(--accent)}
 ::-webkit-scrollbar{width:5px;height:5px}
 ::-webkit-scrollbar-track{background:transparent}
 ::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
@@ -496,7 +496,7 @@ async function loadManage(forceRefresh) {
       el.innerHTML = '<div class="empty"><div class="empty-icon">📭</div>등록된 데이터가 없습니다</div>';
       return;
     }
-    if (!mgCurrentMonth || !mgMonths.includes(mgCurrentMonth)) mgCurrentMonth = mgMonths[0];
+    if (!mgCurrentMonth || !mgMonths.includes(mgCurrentMonth)) mgCurrentMonth = mgMonths[mgMonths.length - 1];
     await loadMgTable(mgCurrentMonth);
   } catch(err) {
     el.innerHTML = `<div class="empty" style="color:var(--red)">오류: ${err.message}</div>`;
@@ -596,7 +596,7 @@ function renderMgTable() {
         </tr></thead>
         <tbody>
           ${filtered.map(c => `
-            <tr data-id="${c.id}" data-month="${mgCurrentMonth}" style="background:#fff">
+            <tr data-id="${c.id}" data-month="${mgCurrentMonth}" style="${c.distributedDate ? '' : 'background:rgba(245,158,11,0.1);'}">
               <td style="font-weight:500">${c.name}${!c.distributedDate?'<span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:#f59e0b;margin-left:6px;vertical-align:middle"></span>':''}</td>
               <td>${(() => {
                 const withdrawn = (c.note||'').split(',').filter(n=>n.includes('퇴원')).length;
@@ -607,13 +607,13 @@ function renderMgTable() {
               })()}</td>
               <td>
                 <div style="display:flex;align-items:center;gap:4px">
-                  <input type="number" min="0" value="${c.inStock||0}" data-field="inStock" oninput="scheduleAutoSave(this.closest('tr'))">
+                  <input type="number" min="0" value="${c.inStock||0}" data-field="inStock" oninput="scheduleAutoSave(this.closest('tr'))" style="text-align:center">
                   <button class="btn-fill" onclick="fillWithCurrent(this.closest('tr'),'inStock')" title="결제인원과 동일">=</button>
                 </div>
               </td>
               <td>
                 <div style="display:flex;align-items:center;gap:4px">
-                  <input type="number" min="0" value="${c.distributed||0}" data-field="distributed" oninput="scheduleAutoSave(this.closest('tr'))">
+                  <input type="number" min="0" value="${c.distributed||0}" data-field="distributed" oninput="scheduleAutoSave(this.closest('tr'))" style="text-align:center">
                   <button class="btn-fill" onclick="fillWithCurrent(this.closest('tr'),'distributed')" title="결제인원과 동일">=</button>
                 </div>
               </td>
@@ -649,7 +649,7 @@ async function loadPrint() {
     ptMonths = Array.from(set).sort();
     renderPtMonthTabs();
     if (ptMonths.length > 0 && !ptCurrentMonth) {
-      ptCurrentMonth = ptMonths[0];
+      ptCurrentMonth = ptMonths[ptMonths.length - 1];
       await loadPtContents(ptCurrentMonth);
     }
   } catch(err) { console.error(err); }
