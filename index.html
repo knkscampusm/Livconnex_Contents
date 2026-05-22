@@ -373,12 +373,10 @@ function openSaveModal() {
   const activeContents = contentNames.filter(n => boughtCounts[n] > 0);
   const now = new Date();
   let opts = '';
-  for (let y = 2025; y <= 2027; y++) {
-    for (let m = 1; m <= 12; m++) {
-      const val = y + '-' + String(m).padStart(2,'0');
-      const sel = (y === now.getFullYear() && m === now.getMonth()+1) ? 'selected' : '';
-      opts += `<option value="${val}" ${sel}>${y}년 ${m}월</option>`;
-    }
+  for (let m = 1; m <= 12; m++) {
+    const val = '2026-' + String(m).padStart(2,'0');
+    const sel = (now.getFullYear() === 2026 && m === now.getMonth()+1) ? 'selected' : '';
+    opts += `<option value="${val}" ${sel}>2026년 ${m}월</option>`;
   }
   document.getElementById('save-modal-body').innerHTML = `
     <div style="margin-bottom:16px">
@@ -738,18 +736,18 @@ async function doPrint() {
   const groups = {};
   buyers.forEach(s => { const g=s.group||'미배정'; if(!groups[g]) groups[g]=[]; groups[g].push(s); });
   const cname = ptSelectedContent.name;
-  document.getElementById('print-preview').innerHTML = Object.keys(groups).sort().map(g => {
-    const list = groups[g];
-    return `<div class="print-page">
-      <div class="print-header">${cname} 학생에게 배부 부탁드립니다. 감사합니다.<br>
-        <span style="font-size:10pt;font-weight:400">그룹: ${g} / ${list.length}명</span>
-      </div>
-      <table class="print-table">
-        <thead><tr><th style="width:40px">연번</th><th style="width:50px">반</th><th style="width:50px">그룹</th><th style="width:40px">성별</th><th style="width:80px">학번</th><th>이름</th><th>독서실</th></tr></thead>
-        <tbody>${list.map((s,i) => `<tr><td>${i+1}</td><td>${s.ban}</td><td>${s.group}</td><td>${s.gender}</td><td>${s.sid}</td><td>${s.name}</td><td>${s.seat}</td></tr>`).join('')}</tbody>
-      </table>
-    </div>`;
-  }).join('');
+  const totalCount = buyers.length;
+  const allRows = buyers.map((s,i) => `<tr><td>${i+1}</td><td>${s.ban}</td><td>${s.group}</td><td>${s.sid}</td><td>${s.name}</td><td>${s.seat}</td></tr>`).join('');
+
+  document.getElementById('print-preview').innerHTML = `<div class="print-page">
+    <div class="print-header">${cname} 학생에게 배부 부탁드립니다. 감사합니다.<br>
+      <span style="font-size:10pt;font-weight:400">총 ${totalCount}명</span>
+    </div>
+    <table class="print-table">
+      <thead><tr><th style="width:40px">연번</th><th style="width:50px">반</th><th style="width:50px">그룹</th><th style="width:80px">학번</th><th>이름</th><th>독서실</th></tr></thead>
+      <tbody>${allRows}</tbody>
+    </table>
+  </div>`;
   window.print();
 }
 
