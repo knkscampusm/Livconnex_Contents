@@ -184,6 +184,26 @@ tr:hover td{background:rgba(43,173,160,.03)}
 
 </div>
 
+<!-- MODAL: PDF 링크 입력 -->
+<div class="modal-overlay" id="pdf-modal">
+  <div class="modal" style="max-width:420px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+      <h2 style="margin:0">📄 안내문 PDF 링크</h2>
+      <button onclick="document.getElementById('pdf-modal').classList.remove('open')" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--text3)">✕</button>
+    </div>
+    <div style="font-size:12px;color:var(--text2);margin-bottom:12px;line-height:1.7">
+      Google Drive에서 PDF 공유 링크를 복사해 붙여넣으세요.<br>
+      <span style="color:var(--text3)">파일 → 공유 → 링크 복사 (뷰어 권한)</span>
+    </div>
+    <input type="text" id="pdf-url-input" style="width:100%" placeholder="https://drive.google.com/file/d/...">
+    <div id="pdf-modal-msg" style="font-size:12px;margin-top:8px;min-height:18px"></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="document.getElementById('pdf-modal').classList.remove('open')">취소</button>
+      <button class="btn btn-primary" onclick="savePdfUrl()">저장</button>
+    </div>
+  </div>
+</div>
+
 <!-- MODAL: 출력 확인 -->
 <div class="modal-overlay" id="print-confirm-modal">
   <div class="modal" style="max-width:400px">
@@ -609,6 +629,7 @@ function renderMgTable() {
           <th style="width:60px;text-align:center">반품</th>
           <th style="width:120px">입고일</th>
           <th style="width:120px">배부일</th>
+          <th style="width:80px;text-align:center">안내문</th>
           <th>비고</th>
         </tr></thead>
         <tbody>
@@ -632,6 +653,12 @@ function renderMgTable() {
               <td><input type="number" min="0" value="${c.returned||0}" data-field="returned" oninput="scheduleAutoSave(this.closest('tr'))" style="text-align:center;width:100%"></td>
               <td><input type="date" value="${c.inStockDate||''}" data-field="inStockDate" onchange="scheduleAutoSave(this.closest('tr'))"></td>
               <td><input type="date" value="${c.distributedDate||''}" data-field="distributedDate" onchange="scheduleAutoSave(this.closest('tr'));this.closest('tr').style.background=this.value?'':'rgba(245,158,11,0.1)'"></td>
+              <td style="text-align:center">
+                ${c.pdfUrl
+                  ? `<a href="${c.pdfUrl}" target="_blank" class="btn btn-ghost btn-sm" style="font-size:11px;padding:3px 10px;color:var(--red);border-color:var(--red)">PDF</a>`
+                  : `<label title="Google Drive PDF 링크 입력" style="cursor:pointer;color:var(--text3);font-size:18px" onclick="openPdfInput('${c.id}','${mgCurrentMonth}')">+</label>`
+                }
+              </td>
               <td><input type="text" value="${c.note||''}" placeholder="비고" data-field="note" oninput="scheduleAutoSave(this.closest('tr'))"></td>
             </tr>`;
           }).join('')}
@@ -641,6 +668,50 @@ function renderMgTable() {
 }
 
 
+
+// ── PDF 링크 관리 ─────────────────────────
+let pdfTargetId = null, pdfTargetMonth = null;
+
+function openPdfInput(id, month) {
+  pdfTargetId = id;
+  pdfTargetMonth = month;
+  document.getElementById('pdf-url-input').value = '';
+  document.getElementById('pdf-modal-msg').textContent = '';
+  document.getElementById('pdf-modal').classList.add('open');
+}
+
+async function savePdfUrl() {
+  const url = document.getElementById('pdf-url-input').value.trim();
+  const msgEl = document.getElementById('pdf-modal-msg');
+  if (!url) { msgEl.style.color='var(--red)'; msgEl.textContent='링크를 입력해주세요'; return; }
+  if (!url.startsWith('http')) { msgEl.style.color='var(--red)'; msgEl.textContent='올바른 URL을 입력해주세요'; return; }
+
+  // Google Drive 링크를 뷰어용으로 변환
+  let pdfUrl = url;
+  const driveMatch = url.match(/\/file\/d\/([^/]+)/);
+  if (driveMatch) {
+    pdfUrl = `https://drive.google.com/file/d/${driveMatch[1]}/preview`;
+  }
+
+  try {
+    const ref = db.collection('contentMgmt').doc(pdfTargetMonth).collection('contents').doc(pdfTargetId);
+    await ref.update({ pdfUrl, updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
+    // 캐시 갱신
+    if (mgCache[pdfTargetMonth]) {
+      const c = mgCache[pdfTargetMonth].find(x => x.id === pdfTargetId);
+      if (c) c.pdfUrl = pdfUrl;
+    }
+    msgEl.style.color = 'var(--accent)';
+    msgEl.textContent = '✓ 저장됨';
+    setTimeout(() => {
+      document.getElementById('pdf-modal').classList.remove('open');
+      renderMgTable();
+    }, 800);
+  } catch(err) {
+    msgEl.style.color = 'var(--red)';
+    msgEl.textContent = '저장 실패: ' + err.message;
+  }
+}
 
 // ── PRINT (캐시 적용) ─────────────────────
 let ptMonths = [], ptCurrentMonth = '', ptContents = [], ptSelectedContent = null;
