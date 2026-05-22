@@ -90,6 +90,8 @@ tr:hover td{background:rgba(43,173,160,.03)}
   .print-table td{padding:4px 7px;border:1px solid #ccc;text-align:center}
   .print-table td:nth-child(6){text-align:left}
 }
+.btn-fill{background:var(--surface2);border:1px solid var(--border);color:var(--text2);border-radius:4px;padding:2px 6px;font-size:10px;cursor:pointer;white-space:nowrap;font-family:inherit;transition:all .15s;line-height:1.4}
+.btn-fill:hover{background:rgba(43,173,160,.1);border-color:var(--accent);color:var(--accent)}
 ::-webkit-scrollbar{width:5px;height:5px}
 ::-webkit-scrollbar-track{background:transparent}
 ::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
@@ -145,7 +147,7 @@ tr:hover td{background:rgba(43,173,160,.03)}
   <div class="filter-row">
     <input type="text" id="mg-search" placeholder="🔍 콘텐츠명 검색..." style="flex:1;min-width:180px" oninput="renderMgTable()">
   </div>
-  <div class="notice notice-info" style="font-size:11px">입고량·배부량·반품·날짜·비고는 직접 수정 후 <strong>변경사항 저장</strong> 버튼을 누르세요.</div>
+  <div class="notice notice-info" style="font-size:11px">값을 수정하면 0.8초 후 자동 저장됩니다. 입고량·배부량 우측 <strong>=</strong> 버튼을 누르면 현재 결제인원과 동일하게 채워집니다.</div>
   <div id="mg-content">
     <div class="empty"><div class="empty-icon">📭</div>등록 탭에서 매출장을 먼저 업로드하세요</div>
   </div>
@@ -525,6 +527,42 @@ async function loadMgTable(monthKey) {
   }
 }
 
+// 자동저장 디바운스
+let autoSaveTimer = null;
+function scheduleAutoSave(row) {
+  clearTimeout(autoSaveTimer);
+  // 저장 중 표시
+  const indicator = document.getElementById('autosave-indicator');
+  if (indicator) { indicator.textContent = '입력 중...'; indicator.style.color = 'var(--text3)'; }
+  autoSaveTimer = setTimeout(() => saveSingleRow(row), 800);
+}
+
+async function saveSingleRow(row) {
+  if (!db) return;
+  const indicator = document.getElementById('autosave-indicator');
+  try {
+    const ref = db.collection('contentMgmt').doc(row.dataset.month).collection('contents').doc(row.dataset.id);
+    const updates = { updatedAt: firebase.firestore.FieldValue.serverTimestamp() };
+    row.querySelectorAll('[data-field]').forEach(inp => {
+      updates[inp.dataset.field] = inp.type==='number' ? (parseInt(inp.value)||0) : inp.value;
+    });
+    await ref.update(updates);
+    // 캐시 갱신
+    const c = mgContents.find(x => x.id === row.dataset.id);
+    if (c) row.querySelectorAll('[data-field]').forEach(inp => { c[inp.dataset.field] = inp.type==='number'?(parseInt(inp.value)||0):inp.value; });
+    if (mgCurrentMonth) mgCache[mgCurrentMonth] = [...mgContents];
+    if (indicator) { indicator.textContent = '✓ 자동저장됨'; indicator.style.color = 'var(--accent)'; }
+  } catch(err) {
+    if (indicator) { indicator.textContent = '저장 실패: ' + err.message; indicator.style.color = 'var(--red)'; }
+  }
+}
+
+function fillWithCurrent(rowEl, field) {
+  const currentCount = parseInt(rowEl.querySelector('[data-field="currentCount"]').value) || 0;
+  const inp = rowEl.querySelector(`[data-field="${field}"]`);
+  if (inp) { inp.value = currentCount; scheduleAutoSave(rowEl); }
+}
+
 function renderMgTable() {
   const el = document.getElementById('mg-content');
   const q  = document.getElementById('mg-search').value.trim().toLowerCase();
@@ -534,8 +572,8 @@ function renderMgTable() {
     return;
   }
   el.innerHTML = `
-    <div style="display:flex;justify-content:flex-end;margin-bottom:8px">
-      <button class="btn btn-primary btn-sm" onclick="saveAllMg()">💾 변경사항 저장</button>
+    <div style="display:flex;justify-content:flex-end;align-items:center;margin-bottom:8px;gap:12px">
+      <span id="autosave-indicator" style="font-size:11px;color:var(--text3)"></span>
     </div>
     <div class="mgmt-wrap">
       <table class="mgmt-table">
@@ -551,49 +589,30 @@ function renderMgTable() {
             <tr data-id="${c.id}" data-month="${mgCurrentMonth}">
               <td style="font-weight:500">${c.name}</td>
               <td><span class="badge badge-gray">${c.initialCount||0}</span></td>
-              <td><input type="number" min="0" value="${c.currentCount??c.initialCount??0}" data-field="currentCount"></td>
-              <td><input type="number" min="0" value="${c.inStock||0}" data-field="inStock"></td>
-              <td><input type="number" min="0" value="${c.distributed||0}" data-field="distributed"></td>
-              <td><input type="number" min="0" value="${c.returned||0}" data-field="returned"></td>
-              <td><input type="date" value="${c.inStockDate||''}" data-field="inStockDate"></td>
-              <td><input type="date" value="${c.distributedDate||''}" data-field="distributedDate"></td>
-              <td><input type="text" value="${c.note||''}" placeholder="비고" data-field="note"></td>
+              <td><input type="number" min="0" value="${c.currentCount??c.initialCount??0}" data-field="currentCount" oninput="scheduleAutoSave(this.closest('tr'))"></td>
+              <td>
+                <div style="display:flex;align-items:center;gap:4px">
+                  <input type="number" min="0" value="${c.inStock||0}" data-field="inStock" oninput="scheduleAutoSave(this.closest('tr'))">
+                  <button class="btn-fill" onclick="fillWithCurrent(this.closest('tr'),'inStock')" title="결제인원과 동일">=</button>
+                </div>
+              </td>
+              <td>
+                <div style="display:flex;align-items:center;gap:4px">
+                  <input type="number" min="0" value="${c.distributed||0}" data-field="distributed" oninput="scheduleAutoSave(this.closest('tr'))">
+                  <button class="btn-fill" onclick="fillWithCurrent(this.closest('tr'),'distributed')" title="결제인원과 동일">=</button>
+                </div>
+              </td>
+              <td><input type="number" min="0" value="${c.returned||0}" data-field="returned" oninput="scheduleAutoSave(this.closest('tr'))"></td>
+              <td><input type="date" value="${c.inStockDate||''}" data-field="inStockDate" onchange="scheduleAutoSave(this.closest('tr'))"></td>
+              <td><input type="date" value="${c.distributedDate||''}" data-field="distributedDate" onchange="scheduleAutoSave(this.closest('tr'))"></td>
+              <td><input type="text" value="${c.note||''}" placeholder="비고" data-field="note" oninput="scheduleAutoSave(this.closest('tr'))"></td>
             </tr>`).join('')}
         </tbody>
       </table>
     </div>`;
 }
 
-async function saveAllMg() {
-  if (!db) return;
-  const rows = document.querySelectorAll('.mgmt-table tbody tr[data-id]');
-  if (!rows.length) return;
-  const btn = document.querySelector('[onclick="saveAllMg()"]');
-  btn.disabled = true; btn.textContent = '저장 중...';
-  try {
-    const batch = db.batch();
-    rows.forEach(row => {
-      const ref = db.collection('contentMgmt').doc(row.dataset.month).collection('contents').doc(row.dataset.id);
-      const updates = { updatedAt: firebase.firestore.FieldValue.serverTimestamp() };
-      row.querySelectorAll('[data-field]').forEach(inp => {
-        updates[inp.dataset.field] = inp.type==='number' ? (parseInt(inp.value)||0) : inp.value;
-      });
-      batch.update(ref, updates);
-    });
-    await batch.commit();
-    // 캐시 갱신
-    rows.forEach(row => {
-      const c = mgContents.find(x => x.id === row.dataset.id);
-      if (c) row.querySelectorAll('[data-field]').forEach(inp => { c[inp.dataset.field] = inp.type==='number'?(parseInt(inp.value)||0):inp.value; });
-    });
-    if (mgCurrentMonth) mgCache[mgCurrentMonth] = [...mgContents];
-    btn.textContent = '✓ 저장됨';
-    setTimeout(() => { btn.disabled=false; btn.innerHTML='💾 변경사항 저장'; }, 1500);
-  } catch(err) {
-    alert('저장 실패: ' + err.message);
-    btn.disabled=false; btn.innerHTML='💾 변경사항 저장';
-  }
-}
+
 
 // ── PRINT (캐시 적용) ─────────────────────
 let ptMonths = [], ptCurrentMonth = '', ptContents = [], ptSelectedContent = null;
