@@ -183,6 +183,18 @@ tr:hover td{background:rgba(43,173,160,.03)}
 
 </div>
 
+<!-- MODAL: 출력 확인 -->
+<div class="modal-overlay" id="print-confirm-modal">
+  <div class="modal" style="max-width:400px">
+    <h2>🖨️ 배부용 출력</h2>
+    <div id="print-confirm-body" style="font-size:14px;line-height:2;color:var(--text)"></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="document.getElementById('print-confirm-modal').classList.remove('open')">취소</button>
+      <button class="btn btn-primary" onclick="confirmPrint()">예, 출력합니다</button>
+    </div>
+  </div>
+</div>
+
 <!-- MODAL: 저장 -->
 <div class="modal-overlay" id="save-modal">
   <div class="modal" style="max-width:480px">
@@ -696,11 +708,18 @@ function renderPtContentList() {
   const q  = document.getElementById('pt-search').value.trim().toLowerCase();
   const list = q ? ptContents.filter(c => c.name.toLowerCase().includes(q)) : ptContents;
   if (list.length === 0) { el.innerHTML = '<div style="color:var(--text3);font-size:12px;padding:10px;grid-column:1/-1">콘텐츠 없음</div>'; return; }
-  el.innerHTML = list.map(c => `
-    <div class="ci ${ptSelectedContent&&ptSelectedContent.id===c.id?'selected':''}" onclick="selectContent('${c.id}')">
-      <div class="ci-name">${c.name}</div>
+  const todayStr = new Date().toISOString().slice(0,10);
+  el.innerHTML = list.map(c => {
+    const isSelected = ptSelectedContent && ptSelectedContent.id === c.id;
+    const isDistributed = !!c.distributedDate;
+    const isToday = c.inStockDate === todayStr;
+    const inStockLabel = c.inStockDate ? `<span style="font-size:10px;color:${isToday?'#f59e0b':'var(--text3)'}; font-weight:${isToday?'700':'400'}">${c.inStockDate.slice(5).replace('-','/')}</span>` : '';
+    return `<div class="ci ${isSelected?'selected':''}" onclick="selectContent('${c.id}')"
+      style="${isDistributed?'opacity:0.5;':''}${isToday?'border-color:#f59e0b;background:rgba(245,158,11,0.06);':''}">
+      <div class="ci-name" style="${isDistributed?'text-decoration:line-through;':''}">${c.name} ${inStockLabel}</div>
       <div class="ci-cnt">${c.buyerCount}명</div>
-    </div>`).join('');
+    </div>`;
+  }).join('');
 }
 
 async function selectContent(id) {
@@ -850,6 +869,8 @@ async function loadStudentsFromFirebase() {
   return studentsCache;
 }
 
+let pendingPrintBuyers = [];
+
 async function doPrint() {
   if (!ptSelectedContent) { alert('콘텐츠를 선택해주세요'); return; }
   if (!db) return;
@@ -857,20 +878,35 @@ async function doPrint() {
     db.collection('contentPurchases').doc(ptCurrentMonth).collection('students').get(),
     loadStudentsFromFirebase()
   ]);
-  const buyers = [];
+  pendingPrintBuyers = [];
   purchaseSnap.docs.forEach(d => {
     const data = d.data();
     if (!data.bought||!data.bought[ptSelectedContent.name]) return;
     const sInfo = studentMap[data.sid] || {};
-    buyers.push({ sid:data.sid, name:sInfo.name||data.name||'', ban:sInfo.ban||data.ban||'', group:sInfo.group||'', gender:sInfo.gender||'', seat:sInfo.seat||'' });
+    pendingPrintBuyers.push({ sid:data.sid, name:sInfo.name||data.name||'', ban:sInfo.ban||data.ban||'', group:sInfo.group||'', gender:sInfo.gender||'', seat:sInfo.seat||'' });
   });
-  if (buyers.length === 0) { alert('구매 학생이 없습니다'); return; }
-  buyers.sort((a,b) => a.group<b.group?-1:a.group>b.group?1:a.name.localeCompare(b.name,'ko'));
-  const groups = {};
-  buyers.forEach(s => { const g=s.group||'미배정'; if(!groups[g]) groups[g]=[]; groups[g].push(s); });
+  if (pendingPrintBuyers.length === 0) { alert('구매 학생이 없습니다'); return; }
+
+  // 배부일 포맷
+  const distDate = ptSelectedContent.distributedDate || '';
+  const distLabel = distDate ? distDate.slice(5).replace('-','/') : '미정';
+
+  document.getElementById('print-confirm-body').innerHTML = `
+    <div style="background:var(--surface2);border-radius:8px;padding:14px 18px;line-height:2">
+      <div><strong>${ptSelectedContent.name}</strong></div>
+      <div>배부인원 <strong>${pendingPrintBuyers.length}명</strong></div>
+      <div>배부일 <strong>${distLabel}</strong></div>
+    </div>
+    <div style="font-size:13px;color:var(--text2);margin-top:12px">배부용 명단을 출력하시겠습니까?</div>`;
+  document.getElementById('print-confirm-modal').classList.add('open');
+}
+
+function confirmPrint() {
+  document.getElementById('print-confirm-modal').classList.remove('open');
   const cname = ptSelectedContent.name;
+  pendingPrintBuyers.sort((a,b) => a.group<b.group?-1:a.group>b.group?1:a.name.localeCompare(b.name,'ko'));
   const printGroups = {};
-  buyers.forEach(s => { const g=s.group||'미배정'; if(!printGroups[g]) printGroups[g]=[]; printGroups[g].push(s); });
+  pendingPrintBuyers.forEach(s => { const g=s.group||'미배정'; if(!printGroups[g]) printGroups[g]=[]; printGroups[g].push(s); });
   document.getElementById('print-preview').innerHTML = Object.keys(printGroups).sort().map(g => {
     const list = printGroups[g];
     return `<div class="print-page">
