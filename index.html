@@ -577,10 +577,13 @@ async function saveSingleRow(row) {
   }
 }
 
-function fillWithCurrent(rowEl, field) {
-  const currentCount = parseInt(rowEl.querySelector('[data-field="currentCount"]').value) || 0;
-  const inp = rowEl.querySelector(`[data-field="${field}"]`);
-  if (inp) { inp.value = currentCount; scheduleAutoSave(rowEl); }
+function fillWithCurrent(rowEl) {
+  const count = parseInt(rowEl.querySelector('.badge-gray').textContent) || 0;
+  const inStock = rowEl.querySelector('[data-field="inStock"]');
+  const distributed = rowEl.querySelector('[data-field="distributed"]');
+  if (inStock) inStock.value = count;
+  if (distributed) distributed.value = count;
+  scheduleAutoSave(rowEl);
 }
 
 function renderMgTable() {
@@ -608,25 +611,20 @@ function renderMgTable() {
           ${filtered.map(c => `
             <tr data-id="${c.id}" data-month="${mgCurrentMonth}" style="${c.distributedDate ? '' : 'background:rgba(245,158,11,0.1);'}">
               <td style="font-weight:500">${c.name}</td>
-              <td>${(() => {
-                const withdrawn = (c.note||'').split(',').filter(n=>n.includes('퇴원')).length;
-                const base = c.initialCount||0;
-                return withdrawn > 0
-                  ? `<span class="badge badge-gray">${base}</span> <span style="color:var(--red);font-size:11px;font-weight:700">-${withdrawn}</span>`
-                  : `<span class="badge badge-gray">${base}</span>`;
-              })()}</td>
               <td>
                 <div style="display:flex;flex-direction:column;align-items:center;gap:3px">
-                  <input type="number" min="0" value="${c.inStock||0}" data-field="inStock" oninput="scheduleAutoSave(this.closest('tr'))" style="text-align:center;width:60px">
-                  <button class="btn-fill" onclick="fillWithCurrent(this.closest('tr'),'inStock')" title="결제인원과 동일" style="width:60px;font-size:9px">= 결제인원</button>
+                  ${(() => {
+                    const withdrawn = (c.note||'').split(',').filter(n=>n.includes('퇴원')).length;
+                    const base = c.initialCount||0;
+                    return withdrawn > 0
+                      ? `<span class="badge badge-gray">${base}</span> <span style="color:var(--red);font-size:11px;font-weight:700">-${withdrawn}</span>`
+                      : `<span class="badge badge-gray">${base}</span>`;
+                  })()}
+                  <button class="btn-fill" onclick="fillWithCurrent(this.closest('tr'))" title="입고량·배부량을 결제인원으로 채우기" style="width:100%;font-size:10px;margin-top:2px">=</button>
                 </div>
               </td>
-              <td>
-                <div style="display:flex;flex-direction:column;align-items:center;gap:3px">
-                  <input type="number" min="0" value="${c.distributed||0}" data-field="distributed" oninput="scheduleAutoSave(this.closest('tr'))" style="text-align:center;width:60px">
-                  <button class="btn-fill" onclick="fillWithCurrent(this.closest('tr'),'distributed')" title="결제인원과 동일" style="width:60px;font-size:9px">= 결제인원</button>
-                </div>
-              </td>
+              <td><input type="number" min="0" value="${c.inStock||0}" data-field="inStock" oninput="scheduleAutoSave(this.closest('tr'))" style="text-align:center;width:100%"></td>
+              <td><input type="number" min="0" value="${c.distributed||0}" data-field="distributed" oninput="scheduleAutoSave(this.closest('tr'))" style="text-align:center;width:100%"></td>
               <td><input type="number" min="0" value="${c.returned||0}" data-field="returned" oninput="scheduleAutoSave(this.closest('tr'))"></td>
               <td><input type="date" value="${c.inStockDate||''}" data-field="inStockDate" onchange="scheduleAutoSave(this.closest('tr'))"></td>
               <td><input type="date" value="${c.distributedDate||''}" data-field="distributedDate" onchange="scheduleAutoSave(this.closest('tr'));"></td>
