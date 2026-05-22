@@ -417,6 +417,10 @@ async function doSave() {
     students.forEach(s => { contentNames.forEach(n => { if (s.bought[n]) boughtCounts[n]++; }); });
     const activeContents = contentNames.filter(n => boughtCounts[n] > 0);
 
+    // 상위 문서 명시적 생성 (없으면 get()에서 안 잡힘)
+    await db.collection('contentMgmt').doc(monthKey).set({ monthKey, updatedAt: firebase.firestore.FieldValue.serverTimestamp() }, { merge: true });
+    await db.collection('contentPurchases').doc(monthKey).set({ monthKey, updatedAt: firebase.firestore.FieldValue.serverTimestamp() }, { merge: true });
+
     // 콘텐츠 목록 저장 (500개 배치 제한)
     for (let i = 0; i < activeContents.length; i += 490) {
       const chunk = activeContents.slice(i, i + 490);
