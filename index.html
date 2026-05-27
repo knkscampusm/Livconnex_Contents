@@ -275,9 +275,13 @@ tr:hover td{background:rgba(43,173,160,.03)}
 let db = null, fbConfig = null;
 
 function loadFBConfig() {
-  const saved = localStorage.getItem('cm_fb_config');
-  if (!saved) return false;
-  try { fbConfig = JSON.parse(saved); initFirebase(); return true; } catch(e) { return false; }
+  // Firebase 설정 하드코딩
+  fbConfig = {
+    apiKey: 'AIzaSyDrwaQk4j8MM_XRw7zN2wQiEPBZiY4Mxq8',
+    projectId: 'contents-1910f'
+  };
+  initFirebase();
+  return true;
 }
 
 function initFirebase() {
@@ -292,27 +296,12 @@ function initFirebase() {
       });
     }
     db = firebase.firestore();
-    // 오프라인 캐시 활성화 → 읽기 횟수 절감
     db.enablePersistence({ synchronizeTabs: true }).catch(() => {});
-    const msgEl = document.getElementById('fb-msg');
-    if (msgEl) { msgEl.style.color = 'var(--accent)'; msgEl.textContent = '✓ 연결됨: ' + fbConfig.projectId; }
   } catch(e) { console.error(e); }
 }
 
-function useDefaultFB() {
-  document.getElementById('fb-apikey').value    = 'AIzaSyDrwaQk4j8MM_XRw7zN2wQiEPBZiY4Mxq8';
-  document.getElementById('fb-projectid').value = 'contents-1910f';
-}
-
-function saveFBConfig() {
-  const apiKey    = document.getElementById('fb-apikey').value.trim();
-  const projectId = document.getElementById('fb-projectid').value.trim();
-  if (!apiKey || !projectId) { document.getElementById('fb-msg').textContent = '모두 입력해주세요'; return; }
-  fbConfig = { apiKey, projectId };
-  localStorage.setItem('cm_fb_config', JSON.stringify(fbConfig));
-  try { initFirebase(); document.getElementById('fb-modal').classList.remove('open'); }
-  catch(e) { document.getElementById('fb-msg').textContent = '연결 실패: ' + e.message; }
-}
+function useDefaultFB() {}
+function saveFBConfig() { document.getElementById('fb-modal').classList.remove('open'); }
 
 // ── TAB ───────────────────────────────────
 function switchTab(name) {
@@ -1155,15 +1144,8 @@ async function confirmPrint() {
 
 // ── INIT ──────────────────────────────────
 (function init() {
-  if (!loadFBConfig()) {
-    const notice = document.createElement('div');
-    notice.className = 'notice notice-warn no-print';
-    notice.style.cssText = 'margin:0 0 12px;';
-    notice.innerHTML = '⚠️ Firebase 미연결 — <a href="#" onclick="document.getElementById(\'fb-modal\').classList.add(\'open\');return false" style="color:var(--yellow);font-weight:700">설정하기</a>';
-    document.querySelector('.main').prepend(notice);
-  } else {
-    loadManage();
-  }
+  loadFBConfig();
+  loadManage();
 })();
 </script>
 </body>
