@@ -83,13 +83,16 @@ tr:hover td{background:rgba(43,173,160,.03)}
 @media print{
   body{background:#fff;color:#000}
   .no-print{display:none!important}
-  .print-page{page-break-after:always;padding:15mm 20mm}
+  .print-page{page-break-after:always;padding:15mm 20mm 20mm 20mm}
   .print-page:last-child{page-break-after:auto}
   .print-header{font-size:13pt;font-weight:700;margin-bottom:8mm;line-height:1.5}
   .print-table{width:100%;border-collapse:collapse;font-size:9pt}
-  .print-table th{background:#f0f0f0;padding:5px 7px;border:1px solid #ccc;text-align:center;font-weight:700}
-  .print-table td{padding:4px 7px;border:1px solid #ccc;text-align:center}
-  .print-table td:nth-child(6){text-align:left}
+  .print-table th{background:#e8e8e8;padding:6px 8px;border:1px solid #bbb;text-align:center;font-weight:700}
+  .print-table td{padding:5px 8px;border:1px solid #bbb;text-align:center}
+  .print-table td:nth-child(5){text-align:left}
+  .print-table tbody tr:nth-child(odd) td{background:#f5f5f5}
+  .print-table tbody tr:nth-child(even) td{background:#ffffff}
+  .print-page{border-bottom:none}
 }
 .filter-btn{padding:5px 16px;border-radius:6px;border:1px solid var(--border);background:var(--surface2);color:var(--text2);font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;transition:all .15s}
 .filter-btn:hover{color:var(--text);border-color:var(--text2)}
@@ -192,7 +195,7 @@ tr:hover td{background:rgba(43,173,160,.03)}
     </div>
   </div>
   <div id="buyer-preview"></div>
-  <div id="print-preview"></div>
+  <div id="print-preview" class="no-print" style="display:none"></div>
 </div>
 
 </div>
@@ -874,9 +877,10 @@ function renderBuyerTable() {
     previewEl.innerHTML = '<div style="color:var(--text3);font-size:12px;padding:12px">구매 학생 없음</div>';
     return;
   }
-  const withdrawnCount = previewBuyers.filter(s => s.withdrawn).length;
+  const withdrawnList = previewBuyers.filter(s => s.withdrawn);
+  const withdrawnCount = withdrawnList.length;
   const totalLabel = withdrawnCount > 0
-    ? `총 ${previewBuyers.length}명 <span style="color:var(--red);font-size:12px;font-weight:400">(퇴원: ${withdrawnCount}명)</span>`
+    ? `총 ${previewBuyers.length}명 <span style="color:var(--red);font-size:12px;font-weight:400">(퇴원 제외: ${withdrawnCount}명 (${withdrawnList.map(s=>s.sid).join(', ')}))</span>`
     : `총 ${previewBuyers.length}명`;
 
   previewEl.innerHTML = `
@@ -993,6 +997,7 @@ async function doPrint() {
     const data = d.data();
     if (!data.bought||!data.bought[ptSelectedContent.name]) return;
     const sInfo = studentMap[data.sid] || {};
+    if (sInfo.withdrawn) return; // 퇴원생 제외
     pendingPrintBuyers.push({ sid:data.sid, name:sInfo.name||data.name||'', ban:sInfo.ban||data.ban||'', group:sInfo.group||'', gender:sInfo.gender||'', seat:sInfo.seat||'' });
   });
   if (pendingPrintBuyers.length === 0) { alert('구매 학생이 없습니다'); return; }
