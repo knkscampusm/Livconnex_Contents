@@ -631,6 +631,19 @@ function fillWithCurrent(rowEl) {
   scheduleAutoSave(rowEl);
 }
 
+function getGroupName(name) {
+  // 숫자+단위(호,회,권,편,기,차), SET, 시즌N-N 등 제거해서 그룹명 추출
+  return name
+    .replace(/\s*\d+호\s*$/, '')
+    .replace(/\s*\d+회\s*$/, '')
+    .replace(/\s*\d+권\s*$/, '')
+    .replace(/\s*시즌\d+-\d+\s*$/, ' 시즌')
+    .replace(/\s*시즌\d+\s*$/, ' 시즌')
+    .replace(/\s*-\d+\s*$/, '')
+    .replace(/\s+SET\s*$/i, '')
+    .trim();
+}
+
 function renderMgTable() {
   const el = document.getElementById('mg-content');
   const q  = document.getElementById('mg-search').value.trim().toLowerCase();
@@ -642,6 +655,68 @@ function renderMgTable() {
     el.innerHTML = '<div class="empty"><div class="empty-icon">🔍</div>검색 결과 없음</div>';
     return;
   }
+  // 그룹핑
+  const groups = {};
+  filtered.forEach(c => {
+    const g = getGroupName(c.name);
+    if (!groups[g]) groups[g] = [];
+    groups[g].push(c);
+  });
+  // 그룹별 행 생성
+  const rows = [];
+  Object.entries(groups).forEach(([gname, items]) => {
+    const isMulti = items.length > 1;
+    // 그룹 PDF (그룹 내 첫 번째 pdfUrl 사용)
+    const groupPdf = items.find(c => c.pdfUrl)?.pdfUrl || null;
+    const groupId  = items[0].id;
+
+    if (isMulti) {
+      // 그룹 헤더
+      rows.push(`<tr style="background:var(--surface2)">
+        <td colspan="7" style="font-weight:700;font-size:12px;color:var(--text2);padding:7px 14px;letter-spacing:0.3px">▸ ${gname}</td>
+        <td style="text-align:center">
+          ${groupPdf
+            ? `<a href="${groupPdf}" target="_blank" class="btn btn-ghost btn-sm" style="font-size:11px;padding:3px 10px;color:var(--red);border-color:var(--red)">PDF</a>`
+            : `<label title="그룹 PDF 링크 입력" style="cursor:pointer;color:var(--text3);font-size:18px" onclick="openPdfInput('${groupId}','${mgCurrentMonth}')">+</label>`
+          }
+        </td>
+        <td></td>
+      </tr>`);
+    }
+
+    items.forEach(c => {
+      const withdrawn = (c.note||'').split(',').filter(n=>n.includes('퇴원')).length;
+      const base = c.initialCount||0;
+      const countBadge = withdrawn > 0
+        ? `<span class="badge badge-gray">${base}</span><span style="color:var(--red);font-size:11px;font-weight:700;margin-left:2px">-${withdrawn}</span>`
+        : `<span class="badge badge-gray">${base}</span>`;
+      rows.push(`
+        <tr data-id="${c.id}" data-month="${mgCurrentMonth}" style="${c.distributedDate ? '' : 'background:rgba(245,158,11,0.1);'}">
+          <td style="font-weight:500;${isMulti?'padding-left:22px;':''}">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:6px">
+              <span style="min-width:0;overflow:hidden;text-overflow:ellipsis">${c.name}</span>
+              <button class="btn-fill" onclick="fillWithCurrent(this.closest('tr'))" title="입고량·배부량을 결제인원으로 채우기" style="flex-shrink:0">=</button>
+            </div>
+          </td>
+          <td style="text-align:center">${countBadge}</td>
+          <td><input type="number" min="0" value="${c.inStock||0}" data-field="inStock" oninput="scheduleAutoSave(this.closest('tr'))" style="text-align:center;width:100%"></td>
+          <td><input type="number" min="0" value="${c.distributed||0}" data-field="distributed" oninput="scheduleAutoSave(this.closest('tr'))" style="text-align:center;width:100%"></td>
+          <td><input type="number" min="0" value="${c.returned||0}" data-field="returned" oninput="scheduleAutoSave(this.closest('tr'))" style="text-align:center;width:100%"></td>
+          <td><input type="date" value="${c.inStockDate||''}" data-field="inStockDate" onchange="scheduleAutoSave(this.closest('tr'))"></td>
+          <td><input type="date" value="${c.distributedDate||''}" data-field="distributedDate" onchange="scheduleAutoSave(this.closest('tr'));this.closest('tr').style.background=this.value?'':'rgba(245,158,11,0.1)'"></td>
+          <td style="text-align:center">
+            ${!isMulti
+              ? (c.pdfUrl
+                  ? `<a href="${c.pdfUrl}" target="_blank" class="btn btn-ghost btn-sm" style="font-size:11px;padding:3px 10px;color:var(--red);border-color:var(--red)">PDF</a>`
+                  : `<label title="PDF 링크 입력" style="cursor:pointer;color:var(--text3);font-size:18px" onclick="openPdfInput('${c.id}','${mgCurrentMonth}')">+</label>`)
+              : ''
+            }
+          </td>
+          <td><input type="text" value="${c.note||''}" placeholder="비고" data-field="note" oninput="scheduleAutoSave(this.closest('tr'))"></td>
+        </tr>`);
+    });
+  });
+
   el.innerHTML = `
     <div style="display:flex;justify-content:flex-end;align-items:center;margin-bottom:8px;gap:12px">
       <span id="autosave-indicator" style="font-size:11px;color:var(--text3)"></span>
@@ -659,37 +734,7 @@ function renderMgTable() {
           <th style="width:80px;text-align:center">안내문</th>
           <th>비고</th>
         </tr></thead>
-        <tbody>
-          ${filtered.map(c => {
-            const withdrawn = (c.note||'').split(',').filter(n=>n.includes('퇴원')).length;
-            const base = c.initialCount||0;
-            const countBadge = withdrawn > 0
-              ? `<span class="badge badge-gray">${base}</span><span style="color:var(--red);font-size:11px;font-weight:700;margin-left:2px">-${withdrawn}</span>`
-              : `<span class="badge badge-gray">${base}</span>`;
-            return `
-            <tr data-id="${c.id}" data-month="${mgCurrentMonth}" style="${c.distributedDate ? '' : 'background:rgba(245,158,11,0.1);'}">
-              <td style="font-weight:500">
-                <div style="display:flex;align-items:center;justify-content:space-between;gap:6px">
-                  <span style="min-width:0;overflow:hidden;text-overflow:ellipsis">${c.name}</span>
-                  <button class="btn-fill" onclick="fillWithCurrent(this.closest('tr'))" title="입고량·배부량을 결제인원으로 채우기" style="flex-shrink:0">=</button>
-                </div>
-              </td>
-              <td style="text-align:center">${countBadge}</td>
-              <td><input type="number" min="0" value="${c.inStock||0}" data-field="inStock" oninput="scheduleAutoSave(this.closest('tr'))" style="text-align:center;width:100%"></td>
-              <td><input type="number" min="0" value="${c.distributed||0}" data-field="distributed" oninput="scheduleAutoSave(this.closest('tr'))" style="text-align:center;width:100%"></td>
-              <td><input type="number" min="0" value="${c.returned||0}" data-field="returned" oninput="scheduleAutoSave(this.closest('tr'))" style="text-align:center;width:100%"></td>
-              <td><input type="date" value="${c.inStockDate||''}" data-field="inStockDate" onchange="scheduleAutoSave(this.closest('tr'))"></td>
-              <td><input type="date" value="${c.distributedDate||''}" data-field="distributedDate" onchange="scheduleAutoSave(this.closest('tr'));this.closest('tr').style.background=this.value?'':'rgba(245,158,11,0.1)'"></td>
-              <td style="text-align:center">
-                ${c.pdfUrl
-                  ? `<a href="${c.pdfUrl}" target="_blank" class="btn btn-ghost btn-sm" style="font-size:11px;padding:3px 10px;color:var(--red);border-color:var(--red)">PDF</a>`
-                  : `<label title="Google Drive PDF 링크 입력" style="cursor:pointer;color:var(--text3);font-size:18px" onclick="openPdfInput('${c.id}','${mgCurrentMonth}')">+</label>`
-                }
-              </td>
-              <td><input type="text" value="${c.note||''}" placeholder="비고" data-field="note" oninput="scheduleAutoSave(this.closest('tr'))"></td>
-            </tr>`;
-          }).join('')}
-        </tbody>
+        <tbody>${rows.join('')}</tbody>
       </table>
     </div>`;
 }
@@ -713,23 +758,31 @@ async function savePdfUrl() {
   if (!url) { msgEl.style.color='var(--red)'; msgEl.textContent='링크를 입력해주세요'; return; }
   if (!url.startsWith('http')) { msgEl.style.color='var(--red)'; msgEl.textContent='올바른 URL을 입력해주세요'; return; }
 
-  // Google Drive 링크를 뷰어용으로 변환
   let pdfUrl = url;
-  const driveMatch = url.match(/\/file\/d\/([^/]+)/);
-  if (driveMatch) {
-    pdfUrl = `https://drive.google.com/file/d/${driveMatch[1]}/preview`;
-  }
+  const driveMatch = url.match(/\/file\/d\/([^\/]+)/);
+  if (driveMatch) pdfUrl = `https://drive.google.com/file/d/${driveMatch[1]}/preview`;
 
   try {
-    const ref = db.collection('contentMgmt').doc(pdfTargetMonth).collection('contents').doc(pdfTargetId);
-    await ref.update({ pdfUrl, updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
+    // 같은 그룹 전체에 pdfUrl 저장
+    const targetContent = mgContents.find(x => x.id === pdfTargetId);
+    const targetGroup = targetContent ? getGroupName(targetContent.name) : null;
+    const targets = targetGroup
+      ? mgContents.filter(c => getGroupName(c.name) === targetGroup)
+      : [targetContent];
+
+    const batch = db.batch();
+    targets.forEach(c => {
+      const ref = db.collection('contentMgmt').doc(pdfTargetMonth).collection('contents').doc(c.id);
+      batch.update(ref, { pdfUrl, updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
+    });
+    await batch.commit();
+
     // 캐시 갱신
     if (mgCache[pdfTargetMonth]) {
-      const c = mgCache[pdfTargetMonth].find(x => x.id === pdfTargetId);
-      if (c) c.pdfUrl = pdfUrl;
+      mgCache[pdfTargetMonth].filter(c => getGroupName(c.name) === targetGroup).forEach(c => c.pdfUrl = pdfUrl);
     }
     msgEl.style.color = 'var(--accent)';
-    msgEl.textContent = '✓ 저장됨';
+    msgEl.textContent = `✓ 저장됨 (${targets.length}개 항목)`;
     setTimeout(() => {
       document.getElementById('pdf-modal').classList.remove('open');
       renderMgTable();
