@@ -921,18 +921,15 @@ async function markWithdrawn(sid, name) {
     const existingNote = snap.exists ? (snap.data().note || '') : '';
     const newNote = existingNote ? existingNote + ', ' + noteText : noteText;
 
-    // initialCount -1 반영
-    const currentInitial = snap.exists ? (snap.data().initialCount || 0) : 0;
     await ref.update({
       note: newNote,
-      initialCount: Math.max(0, currentInitial - 1),
       updatedAt: firebase.firestore.FieldValue.serverTimestamp()
     });
 
     // 2) 캐시 갱신
     if (mgCache[monthKey]) {
       const c = mgCache[monthKey].find(x => x.id === contentId);
-      if (c) { c.note = newNote; c.initialCount = Math.max(0, (c.initialCount||0) - 1); }
+      if (c) { c.note = newNote; }
     }
 
     // 3) 명단에서 제거
