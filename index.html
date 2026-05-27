@@ -195,7 +195,7 @@ tr:hover td{background:rgba(43,173,160,.03)}
     </div>
   </div>
   <div id="buyer-preview"></div>
-  <div id="print-preview" class="no-print" style="display:none"></div>
+  <div id="print-preview" style="display:none"></div>
 </div>
 
 </div>
@@ -976,38 +976,47 @@ function renderBuyerTable() {
 
 async function markWithdrawn(sid, name) {
   if (!ptSelectedContent) return;
-  if (!confirm(`${name}(${sid})을 퇴원 처리하시겠습니까?\n콘텐츠 비고란에 기록되고 명단에서 제외됩니다.`)) return;
+  if (!confirm(`${name}(${sid})을 퇴원 처리하시겠습니까?\n이후 같은 그룹 콘텐츠에도 모두 적용됩니다.`)) return;
 
-  const contentId = encodeId(ptSelectedContent.name);
   const monthKey  = ptCurrentMonth;
   const noteText  = `${name}(${sid}) 퇴원`;
+  const currentName = ptSelectedContent.name;
+  const currentGroup = getGroupName(currentName);
+
+  // 같은 그룹 내 콘텐츠 목록 (캐시에서)
+  const allContents = mgCache[monthKey] || [];
+  const groupContents = allContents.filter(c => getGroupName(c.name) === currentGroup);
+
+  // 현재 콘텐츠 번호 추출 함수
+  function getSeqNum(name) {
+    const m = name.match(/(\d+)[호회권편기차]?\s*$/);
+    return m ? parseInt(m[1]) : 0;
+  }
+  const currentSeq = getSeqNum(currentName);
+
+  // 현재 콘텐츠 + 이후 콘텐츠
+  const targets = groupContents.filter(c => getSeqNum(c.name) >= currentSeq);
 
   try {
-    // 1) 콘텐츠 비고 업데이트
-    const ref = db.collection('contentMgmt').doc(monthKey).collection('contents').doc(contentId);
-    const snap = await ref.get();
-    const existingNote = snap.exists ? (snap.data().note || '') : '';
-    const newNote = existingNote ? existingNote + ', ' + noteText : noteText;
-
-    await ref.update({
-      note: newNote,
-      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-    });
-
-    // 2) 캐시 갱신
-    if (mgCache[monthKey]) {
-      const c = mgCache[monthKey].find(x => x.id === contentId);
-      if (c) { c.note = newNote; }
+    const batch = db.batch();
+    for (const c of targets) {
+      const ref = db.collection('contentMgmt').doc(monthKey).collection('contents').doc(c.id);
+      const existingNote = c.note || '';
+      const newNote = existingNote ? existingNote + ', ' + noteText : noteText;
+      batch.update(ref, { note: newNote, updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
+      // 캐시 갱신
+      c.note = newNote;
     }
+    await batch.commit();
 
-    // 3) 명단에서 제거
+    // 명단에서 제거
     previewBuyers = previewBuyers.filter(s => s.sid !== sid);
     renderBuyerTable();
 
-    // 4) 콘텐츠 카드 결제인원 표시 갱신
+    // 콘텐츠 카드 갱신
     updateContentCard(ptSelectedContent.id, -1);
 
-    alert(`처리 완료: ${noteText}`);
+    alert(`처리 완료: ${noteText}\n적용 콘텐츠 ${targets.length}개 (${currentName} 이후)`);
   } catch(err) {
     alert('처리 실패: ' + err.message);
   }
