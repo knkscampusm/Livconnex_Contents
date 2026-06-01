@@ -1127,7 +1127,8 @@ async function confirmPrint() {
   pendingPrintBuyers.sort((a,b) => a.group<b.group?-1:a.group>b.group?1:a.name.localeCompare(b.name,'ko'));
   const printGroups = {};
   pendingPrintBuyers.forEach(s => { const g=s.group||'미배정'; if(!printGroups[g]) printGroups[g]=[]; printGroups[g].push(s); });
-  document.getElementById('print-preview').innerHTML = Object.keys(printGroups).sort().map(g => {
+  const printEl = document.getElementById('print-preview');
+  printEl.innerHTML = Object.keys(printGroups).sort().map(g => {
     const list = printGroups[g];
     return `<div class="print-page">
       <div class="print-header">${cname} 학생에게 배부 부탁드립니다. 감사합니다.<br>
@@ -1139,7 +1140,14 @@ async function confirmPrint() {
       </table>
     </div>`;
   }).join('');
-  window.print();
+  printEl.style.display = 'block';
+  // 렌더링 완료 후 인쇄
+  requestAnimationFrame(() => {
+    setTimeout(() => {
+      window.print();
+      setTimeout(() => { printEl.style.display = 'none'; }, 500);
+    }, 300);
+  });
 }
 
 // ── INIT ──────────────────────────────────
