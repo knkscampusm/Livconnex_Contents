@@ -469,7 +469,7 @@ async function doSave() {
       const batch = db.batch();
       chunk.forEach(cname => {
         const ref = db.collection('contentMgmt').doc(monthKey).collection('contents').doc(encodeId(cname));
-        batch.set(ref, { name:cname, monthKey, initialCount:boughtCounts[cname], currentCount:boughtCounts[cname], inStock:0, distributed:0, returned:0, inStockDate:'', distributedDate:'', note:'', updatedAt:firebase.firestore.FieldValue.serverTimestamp() }, { merge:true });
+        batch.set(ref, { name:cname, monthKey, initialCount:boughtCounts[cname], currentCount:boughtCounts[cname], updatedAt:firebase.firestore.FieldValue.serverTimestamp() }, { merge:true });
       });
       await batch.commit();
     }
