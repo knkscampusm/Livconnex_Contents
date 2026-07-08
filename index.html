@@ -1167,6 +1167,49 @@ window.checkSid = async function(sid, monthKey) {
   return result;
 };
 
+// ── 콘텐츠 문서 ID 중복/드리프트 진단 (F12 콘솔) ──
+// 사용법: checkContentDupes('2026-06')
+// 이름이 눈으로 보기엔 같아 보여도 실제로는 다른 문서(ID)로 저장된 경우를 찾아줍니다.
+// (예: 눈에 안 보이는 공백 문자 차이로 인해 재업로드 시 새 문서가 생성되고,
+//  기존에 입력했던 입고일/배부일/비고가 남아있는 옛 문서가 목록에서 이름이 겹쳐 보이는 경우)
+window.checkContentDupes = async function(monthKey) {
+  monthKey = monthKey || mgCurrentMonth || ptCurrentMonth;
+  if (!db) { console.warn('DB가 아직 초기화되지 않았습니다.'); return; }
+  if (!monthKey) { console.warn('월(monthKey)을 지정해주세요. 예: checkContentDupes("2026-06")'); return; }
+
+  console.log(`%c[checkContentDupes] month=${monthKey} 전체 콘텐츠 문서 조회 중...`, 'color:#2BADA0;font-weight:bold');
+  const snap = await db.collection('contentMgmt').doc(monthKey).collection('contents').get();
+  const byName = {};
+  snap.docs.forEach(d => {
+    const data = d.data();
+    const nm = data.name || '(이름없음)';
+    if (!byName[nm]) byName[nm] = [];
+    byName[nm].push({ id: d.id, inStockDate: data.inStockDate||'', distributedDate: data.distributedDate||'', note: data.note||'', updatedAt: data.updatedAt });
+  });
+
+  const dupes = Object.entries(byName).filter(([nm, docs]) => docs.length > 1);
+  console.log(`%c총 문서 수: ${snap.docs.length} / 서로 다른 이름 수: ${Object.keys(byName).length}`, 'color:#2BADA0');
+
+  if (dupes.length === 0) {
+    console.log('%c중복 없음 — 이름이 겹치는 문서가 없습니다. (문서 ID 드리프트 문제는 아닌 것으로 보입니다)', 'color:#2BADA0;font-weight:bold');
+  } else {
+    console.log(`%c⚠ 이름은 같은데 서로 다른 문서 ID로 중복 저장된 콘텐츠 ${dupes.length}건 발견:`, 'color:#e5534b;font-weight:bold');
+    dupes.forEach(([nm, docs]) => {
+      console.log(`%c▸ "${nm}" — ${docs.length}개 문서`, 'color:#f59e0b;font-weight:bold');
+      console.table(docs);
+    });
+    console.log('%c위 목록에서 inStockDate/distributedDate/note가 채워진 문서(주로 오래된 updatedAt)가 예전 데이터입니다. 최신 문서 ID로 값을 옮겨야 합니다.', 'color:#e5534b');
+  }
+
+  // 이름 안에 특수공백(줄바꿈, non-breaking space 등) 포함 여부도 체크
+  const suspicious = Object.keys(byName).filter(nm => /[\u00A0\u200B\t\n\r]/.test(nm));
+  if (suspicious.length) {
+    console.log('%c⚠ 이름에 눈에 안 보이는 특수 공백 문자가 포함된 콘텐츠:', 'color:#e5534b;font-weight:bold', suspicious);
+  }
+
+  return byName;
+};
+
 async function doPrint() {
   if (!ptSelectedContent) { alert('콘텐츠를 선택해주세요'); return; }
   if (!db) return;
