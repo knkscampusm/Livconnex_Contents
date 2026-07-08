@@ -175,6 +175,14 @@ tr:hover td{background:rgba(43,173,160,.03)}
     <div class="month-tabs" id="pt-month-tabs"></div>
   </div>
   <div class="card no-print" style="margin-top:10px">
+    <div style="font-size:13px;font-weight:600;margin-bottom:10px;color:var(--text2)">🔍 학번으로 원본 데이터 조회 (명단 누락 진단용)</div>
+    <div style="display:flex;gap:8px">
+      <input type="text" id="lookup-sid" placeholder="학번 입력 (예: 8341)" style="flex:1" onkeydown="if(event.key==='Enter')lookupStudent()">
+      <button class="btn btn-primary btn-sm" onclick="lookupStudent()">조회</button>
+    </div>
+    <div id="lookup-result" style="margin-top:10px;font-size:12px"></div>
+  </div>
+  <div class="card no-print" style="margin-top:10px">
     <div style="display:flex;gap:6px;margin-bottom:12px">
       <button class="filter-btn" id="pt-filter-all" onclick="setPtFilter('all')">전체</button>
       <button class="filter-btn" id="pt-filter-distributed" onclick="setPtFilter('distributed')">배부</button>
@@ -620,7 +628,10 @@ async function saveSingleRow(row) {
 }
 
 function fillWithCurrent(rowEl) {
-  const count = parseInt(rowEl.querySelector('.badge-gray').textContent) || 0;
+  const c = mgContents.find(x => x.id === rowEl.dataset.id);
+  const base = c ? (c.initialCount||0) : (parseInt(rowEl.querySelector('.badge-gray').textContent) || 0);
+  const withdrawn = c ? (c.note||'').split(',').filter(n=>n.includes('퇴원')).length : 0;
+  const count = Math.max(0, base - withdrawn); // 퇴원 인원 제외한 실제 결제인원
   const inStock = rowEl.querySelector('[data-field="inStock"]');
   const distributed = rowEl.querySelector('[data-field="distributed"]');
   if (inStock) inStock.value = count;
@@ -856,13 +867,17 @@ async function loadPtContents(monthKey) {
   }
 
   try {
-    const [mgSnap, purSnap] = await Promise.all([
+    const [mgSnap, purSnap, studentMap] = await Promise.all([
       db.collection('contentMgmt').doc(monthKey).collection('contents').orderBy('name').get(),
-      db.collection('contentPurchases').doc(monthKey).collection('students').get()
+      db.collection('contentPurchases').doc(monthKey).collection('students').get(),
+      loadStudentsFromFirebase()
     ]);
     const boughtCounts = {};
     purSnap.docs.forEach(d => {
-      Object.entries(d.data().bought||{}).forEach(([k,v]) => { if(v) boughtCounts[k]=(boughtCounts[k]||0)+1; });
+      const data = d.data();
+      const sInfo = studentMap[data.sid] || {};
+      if (sInfo.withdrawn) return; // 퇴원생은 재원 기준 구매인원에서 제외
+      Object.entries(data.bought||{}).forEach(([k,v]) => { if(v) boughtCounts[k]=(boughtCounts[k]||0)+1; });
     });
     ptContents = mgSnap.docs.map(d => ({ id:d.id, ...d.data(), buyerCount:boughtCounts[d.data().name]||0 }));
     ptCache[monthKey] = ptContents;
@@ -1002,8 +1017,8 @@ async function markWithdrawn(sid, name) {
     previewBuyers = previewBuyers.filter(s => s.sid !== sid);
     renderBuyerTable();
 
-    // 콘텐츠 카드 갱신
-    updateContentCard(ptSelectedContent.id, -1);
+    // 콘텐츠 카드 갱신 — 같은 그룹의 대상 콘텐츠(현재 콘텐츠 + 이후 콘텐츠) 전체에서 인원수 차감
+    targets.forEach(c => updateContentCard(c.id, -1));
 
     alert(`처리 완료: ${noteText}\n적용 콘텐츠 ${targets.length}개 (${currentName} 이후)`);
   } catch(err) {
@@ -1047,6 +1062,110 @@ async function loadStudentsFromFirebase() {
 }
 
 let pendingPrintBuyers = [];
+
+async function lookupStudent() {
+  const sid = document.getElementById('lookup-sid').value.trim();
+  const resEl = document.getElementById('lookup-result');
+  if (!sid) { resEl.innerHTML = '<span style="color:var(--red)">학번을 입력해주세요</span>'; return; }
+  if (!ptCurrentMonth) { resEl.innerHTML = '<span style="color:var(--red)">월을 먼저 선택해주세요</span>'; return; }
+  if (!db) return;
+  resEl.innerHTML = '<span style="color:var(--text3)">조회 중...</span>';
+
+  try {
+    const [purDoc, stuDoc] = await Promise.all([
+      db.collection('contentPurchases').doc(ptCurrentMonth).collection('students').doc(sid).get(),
+      db.collection('students').doc(sid).get()
+    ]);
+
+    let html = '';
+
+    // 1) 구매 문서 (contentPurchases) 확인
+    if (!purDoc.exists) {
+      html += `<div style="padding:10px;border-radius:8px;background:rgba(229,83,75,0.08);color:var(--red);margin-bottom:8px">
+        ❌ <strong>${ptCurrentMonth}</strong> 구매 데이터(contentPurchases)에 학번 <strong>${sid}</strong> 문서가 존재하지 않습니다.<br>
+        → 매출장에는 있지만 저장이 누락됐거나, 학번 형식(공백/자릿수 등)이 다르게 저장됐을 수 있습니다.
+      </div>`;
+    } else {
+      const pdata = purDoc.data();
+      const boughtList = Object.entries(pdata.bought||{}).filter(([k,v])=>v).map(([k])=>k);
+      html += `<div style="padding:10px;border-radius:8px;background:rgba(43,173,160,0.08);margin-bottom:8px">
+        ✓ 구매 데이터 존재 (이름: ${pdata.name||'-'}, 반: ${pdata.ban||'-'})<br>
+        구매 콘텐츠(${boughtList.length}개): ${boughtList.length ? boughtList.join(', ') : '<span style="color:var(--red)">없음</span>'}
+      </div>`;
+      if (ptSelectedContent) {
+        const hasSelected = !!(pdata.bought && pdata.bought[ptSelectedContent.name]);
+        html += `<div style="padding:8px 10px;border-radius:8px;background:${hasSelected?'rgba(43,173,160,0.08)':'rgba(245,158,11,0.1)'};margin-bottom:8px">
+          현재 선택된 콘텐츠 "<strong>${ptSelectedContent.name}</strong>" 구매 여부: <strong>${hasSelected ? '✓ 구매함' : '✗ 구매 안 됨(false/누락) — 이 때문에 명단에서 빠짐'}</strong>
+        </div>`;
+      }
+    }
+
+    // 2) 학생 마스터 문서 확인
+    if (!stuDoc.exists) {
+      html += `<div style="padding:10px;border-radius:8px;background:rgba(229,83,75,0.08);color:var(--red)">
+        ❌ students 마스터 컬렉션에 학번 <strong>${sid}</strong> 문서가 없습니다. (이름/반/그룹 정보를 못 가져와 명단에서 이름이 비거나 조인이 안 될 수 있음)
+      </div>`;
+    } else {
+      const sdata = stuDoc.data();
+      const isWithdrawn = !sdata.enrollDate;
+      html += `<div style="padding:10px;border-radius:8px;background:${isWithdrawn?'rgba(245,158,11,0.1)':'rgba(43,173,160,0.08)'}">
+        ✓ 학생 마스터 존재 — 이름: ${sdata.name||'-'} / 반: ${sdata.ban||'-'} / 그룹: ${sdata.group||'-'} / enrollDate: ${sdata.enrollDate||'<span style="color:var(--red)">없음</span>'}<br>
+        재원 상태: ${isWithdrawn ? '<strong style="color:var(--yellow)">퇴원 처리됨 (enrollDate 없음) → 배부 명단/출력에서 자동 제외됨</strong>' : '재원 중'}
+      </div>`;
+    }
+
+    resEl.innerHTML = html;
+  } catch(err) {
+    resEl.innerHTML = `<span style="color:var(--red)">조회 실패: ${err.message}</span>`;
+  }
+}
+
+// ── 콘솔 진단용 (F12 개발자도구 콘솔에서 직접 호출) ──
+// 사용법: checkSid('8341')            → 현재 선택된 월 기준 조회
+//         checkSid('8341', '2026-07') → 특정 월 지정 조회
+window.checkSid = async function(sid, monthKey) {
+  sid = String(sid).trim();
+  monthKey = monthKey || ptCurrentMonth;
+  if (!db) { console.warn('DB가 아직 초기화되지 않았습니다.'); return; }
+  if (!monthKey) { console.warn('월(monthKey)을 지정해주세요. 예: checkSid("8341","2026-07")'); return; }
+
+  console.log(`%c[checkSid] sid=${sid} / month=${monthKey}`, 'color:#2BADA0;font-weight:bold');
+
+  const [purDoc, stuDoc] = await Promise.all([
+    db.collection('contentPurchases').doc(monthKey).collection('students').doc(sid).get(),
+    db.collection('students').doc(sid).get()
+  ]);
+
+  const result = { sid, monthKey, purchaseExists: purDoc.exists, purchaseData: null, studentExists: stuDoc.exists, studentData: null };
+
+  if (purDoc.exists) {
+    const pdata = purDoc.data();
+    result.purchaseData = pdata;
+    const boughtList = Object.entries(pdata.bought||{}).filter(([k,v])=>v).map(([k])=>k);
+    console.log('%c✓ contentPurchases 문서 존재', 'color:#2BADA0');
+    console.log('  이름/반:', pdata.name, '/', pdata.ban);
+    console.log('  구매=true 콘텐츠 목록:', boughtList);
+    console.log('  bought 전체 맵:', pdata.bought);
+    if (ptSelectedContent) {
+      console.log(`  선택된 콘텐츠 "${ptSelectedContent.name}" 구매 여부:`, !!(pdata.bought && pdata.bought[ptSelectedContent.name]));
+    }
+  } else {
+    console.log('%c✗ contentPurchases 문서 없음 → 이 학번으로 저장된 구매 데이터 자체가 없음 (학번 형식/저장 누락 의심)', 'color:#e5534b;font-weight:bold');
+  }
+
+  if (stuDoc.exists) {
+    const sdata = stuDoc.data();
+    result.studentData = sdata;
+    console.log('%c✓ students(마스터) 문서 존재', 'color:#2BADA0');
+    console.log('  이름/반/그룹:', sdata.name, '/', sdata.ban, '/', sdata.group);
+    console.log('  enrollDate:', sdata.enrollDate || '(없음 → 퇴원 처리되어 배부 명단/출력에서 자동 제외됨)');
+  } else {
+    console.log('%c✗ students(마스터) 문서 없음 → 이름/반/그룹 조인 불가', 'color:#e5534b;font-weight:bold');
+  }
+
+  console.log('%c[checkSid] 결과 객체:', 'color:#2BADA0', result);
+  return result;
+};
 
 async function doPrint() {
   if (!ptSelectedContent) { alert('콘텐츠를 선택해주세요'); return; }
