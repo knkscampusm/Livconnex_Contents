@@ -256,28 +256,6 @@ tr:hover td{background:rgba(43,173,160,.03)}
   </div>
 </div>
 
-<!-- MODAL: Firebase 설정 -->
-<div class="modal-overlay" id="fb-modal">
-  <div class="modal">
-    <h2>🔥 Firebase 설정</h2>
-    <div style="font-size:12px;color:var(--text2);margin-bottom:14px;line-height:1.7">기존 위클리팩 시스템과 같은 Firebase 프로젝트를 사용하거나 새 프로젝트를 입력하세요.</div>
-    <div style="margin-bottom:10px">
-      <label style="display:block;font-size:12px;color:var(--text2);margin-bottom:4px">API Key</label>
-      <input type="text" id="fb-apikey" style="width:100%" placeholder="AIzaSy...">
-    </div>
-    <div style="margin-bottom:10px">
-      <label style="display:block;font-size:12px;color:var(--text2);margin-bottom:4px">Project ID</label>
-      <input type="text" id="fb-projectid" style="width:100%" placeholder="my-project-id">
-    </div>
-    <div id="fb-msg" style="font-size:12px;min-height:18px;margin-bottom:8px"></div>
-    <div style="font-size:11px;color:var(--text3);margin-bottom:12px">💡 기존 위클리팩과 동일한 프로젝트 사용 시 아래 버튼 클릭</div>
-    <button class="btn btn-ghost btn-sm" onclick="useDefaultFB()" style="margin-bottom:12px;width:100%">기존 위클리팩 Firebase 사용 (contents-1910f)</button>
-    <div class="modal-actions">
-      <button class="btn btn-primary" onclick="saveFBConfig()">저장 및 연결</button>
-    </div>
-  </div>
-</div>
-
 <script>
 // ── FIREBASE ──────────────────────────────
 let db = null, fbConfig = null;
@@ -308,8 +286,6 @@ function initFirebase() {
   } catch(e) { console.error(e); }
 }
 
-function useDefaultFB() {}
-function saveFBConfig() { document.getElementById('fb-modal').classList.remove('open'); }
 
 // ── TAB ───────────────────────────────────
 function switchTab(name) {
@@ -412,7 +388,7 @@ function renderPreview() {
 // ── SAVE MODAL ────────────────────────────
 function openSaveModal() {
   if (!parsedData) return;
-  if (!db) { document.getElementById('fb-modal').classList.add('open'); return; }
+  if (!db) { alert('Firebase 연결에 실패했습니다. 페이지를 새로고침해주세요.'); return; }
   const { contentNames, students } = parsedData;
   const boughtCounts = {};
   contentNames.forEach(n => boughtCounts[n] = 0);
@@ -546,7 +522,7 @@ function toggleMgGroup(gname) {
 let mgCache = {}; // monthKey → contents[]
 
 async function loadManage(forceRefresh) {
-  if (!db) { document.getElementById('fb-modal').classList.add('open'); return; }
+  if (!db) { alert('Firebase 연결에 실패했습니다. 페이지를 새로고침해주세요.'); return; }
   const el = document.getElementById('mg-content');
   el.innerHTML = '<div class="empty" style="padding:30px">불러오는 중...</div>';
 
@@ -652,6 +628,15 @@ function fillWithCurrent(rowEl) {
   scheduleAutoSave(rowEl);
 }
 
+// onclick="...('${str}')" 형태로 HTML 속성 안에 문자열을 넣을 때,
+// 콘텐츠명/그룹명에 작은따옴표(')나 큰따옴표(")가 있어도 깨지지 않도록 이스케이프
+function escAttr(str) {
+  return String(str)
+    .replace(/\\/g, '\\\\')
+    .replace(/'/g, "\\'")
+    .replace(/"/g, '&quot;');
+}
+
 function getGroupName(name) {
   // 숫자+단위(호,회,권,편,기,차), SET, 시즌N-N 등 제거해서 그룹명 추출
   return name
@@ -699,7 +684,7 @@ function renderMgTable() {
 
     if (isMulti) {
       const arrow = isCollapsed ? '▸' : '▾';
-      rows.push(`<tr style="background:var(--surface2);cursor:pointer" onclick="toggleMgGroup('${gname.replace(/'/g,"\\'")}')">
+      rows.push(`<tr style="background:var(--surface2);cursor:pointer" onclick="toggleMgGroup('${escAttr(gname)}')">
         <td colspan="7" style="font-weight:700;font-size:12px;color:var(--text2);padding:7px 14px;letter-spacing:0.3px;user-select:none">${arrow} ${gname} <span style="font-weight:400;color:var(--text3)">(${items.length}종)</span></td>
         <td style="text-align:center">
           ${groupPdf
@@ -835,7 +820,7 @@ let ptCache = {}; // monthKey → { contents, buyers }
 
 
 async function loadPrint() {
-  if (!db) { document.getElementById('fb-modal').classList.add('open'); return; }
+  if (!db) { alert('Firebase 연결에 실패했습니다. 페이지를 새로고침해주세요.'); return; }
   if (ptMonths.length > 0) { renderPtMonthTabs(); return; } // 이미 로드된 경우 재조회 안함
 
   try {
@@ -973,7 +958,7 @@ function renderBuyerTable() {
       <div style="font-size:13px;font-weight:600;margin-bottom:10px">${totalLabel}</div>
       <div class="tbl-wrap" style="max-height:400px">
         <table>
-          <thead><tr><th>연번</th><th>반</th><th>그룹</th><th>학번</th><th>이름</th><th>독서실</th><th></th></tr></thead>
+          <thead><tr><th>연번</th><th>반</th><th>그룹</th><th>학번</th><th>이름</th><th>독서실</th></tr></thead>
           <tbody>${previewBuyers.map((s,i) => `
             <tr style="${s.withdrawn?'background:rgba(229,83,75,0.05);':''}">
               <td>${i+1}</td>
@@ -982,72 +967,11 @@ function renderBuyerTable() {
               <td>${s.sid}</td>
               <td>${s.name}${s.withdrawn?'<span style="color:var(--red);font-size:10px;margin-left:4px">(퇴원)</span>':''}</td>
               <td>${s.seat}</td>
-              <td>${s.withdrawn?`<button class="btn btn-danger btn-sm" onclick="markWithdrawn('${s.sid}','${s.name}')">퇴원처리</button>`:''}
-              </td>
             </tr>`).join('')}
           </tbody>
         </table>
       </div>
     </div>`;
-}
-
-async function markWithdrawn(sid, name) {
-  if (!ptSelectedContent) return;
-  if (!confirm(`${name}(${sid})을 퇴원 처리하시겠습니까?\n이후 같은 그룹 콘텐츠에도 모두 적용됩니다.`)) return;
-
-  const monthKey  = ptCurrentMonth;
-  const noteText  = `${name}(${sid}) 퇴원`;
-  const currentName = ptSelectedContent.name;
-  const currentGroup = getGroupName(currentName);
-
-  // 같은 그룹 내 콘텐츠 목록 (캐시에서)
-  const allContents = mgCache[monthKey] || [];
-  const groupContents = allContents.filter(c => getGroupName(c.name) === currentGroup);
-
-  // 현재 콘텐츠 번호 추출 함수
-  function getSeqNum(name) {
-    const m = name.match(/(\d+)[호회권편기차]?\s*$/);
-    return m ? parseInt(m[1]) : 0;
-  }
-  const currentSeq = getSeqNum(currentName);
-
-  // 현재 콘텐츠 + 이후 콘텐츠
-  const targets = groupContents.filter(c => getSeqNum(c.name) >= currentSeq);
-
-  try {
-    const batch = db.batch();
-    for (const c of targets) {
-      const ref = db.collection('contentMgmt').doc(monthKey).collection('contents').doc(c.id);
-      const existingNote = c.note || '';
-      const newNote = existingNote ? existingNote + ', ' + noteText : noteText;
-      batch.update(ref, { note: newNote, updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
-      // 캐시 갱신
-      c.note = newNote;
-    }
-    await batch.commit();
-
-    // 명단에서 제거
-    previewBuyers = previewBuyers.filter(s => s.sid !== sid);
-    renderBuyerTable();
-
-    // 콘텐츠 카드 갱신 — 같은 그룹의 대상 콘텐츠(현재 콘텐츠 + 이후 콘텐츠) 전체에서 인원수 차감
-    targets.forEach(c => updateContentCard(c.id, -1));
-
-    alert(`처리 완료: ${noteText}\n적용 콘텐츠 ${targets.length}개 (${currentName} 이후)`);
-  } catch(err) {
-    alert('처리 실패: ' + err.message);
-  }
-}
-
-function updateContentCard(contentId, delta) {
-  // ptContents 캐시 업데이트
-  const c = ptContents.find(x => x.id === contentId);
-  if (c) c.buyerCount = Math.max(0, (c.buyerCount||0) + delta);
-  if (ptCache[ptCurrentMonth]) {
-    const cc = ptCache[ptCurrentMonth].find(x => x.id === contentId);
-    if (cc) cc.buyerCount = Math.max(0, (cc.buyerCount||0) + delta);
-  }
-  renderPtContentList();
 }
 
 // 학생 데이터 Firebase에서 로드 (캐시)
