@@ -474,13 +474,24 @@ async function doSave() {
       await batch.commit();
     }
 
-    // 학생 데이터 저장
+    // 학생 데이터 저장 — bought는 이번 업로드 항목만 부분 병합 (기존 콘텐츠 구매기록 보존)
     const CHUNK = 490;
     for (let i = 0; i < students.length; i += CHUNK) {
       const batch = db.batch();
       students.slice(i, i + CHUNK).forEach(s => {
         const ref = db.collection('contentPurchases').doc(monthKey).collection('students').doc(s.sid);
-        batch.set(ref, { sid:s.sid, name:s.name, ban:s.ban, bought:s.bought, updatedAt:firebase.firestore.FieldValue.serverTimestamp() });
+        const updates = {
+          sid: s.sid,
+          name: s.name,
+          ban: s.ban,
+          updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        };
+        // bought 맵은 점(dot) 표기 필드 경로로 지정 → merge:true와 함께 쓰면
+        // 이번 업로드에 있는 콘텐츠만 갱신되고, 기존에 저장돼 있던 다른 콘텐츠 구매기록은 유지됨
+        Object.entries(s.bought).forEach(([cname, val]) => {
+          updates[`bought.${cname}`] = val;
+        });
+        batch.set(ref, updates, { merge: true });
       });
       await batch.commit();
       msgEl.textContent = `저장 중... ${Math.min(i+CHUNK, students.length)}/${students.length}명`;
