@@ -488,8 +488,10 @@ async function doSave() {
         };
         // bought 맵은 점(dot) 표기 필드 경로로 지정 → merge:true와 함께 쓰면
         // 이번 업로드에 있는 콘텐츠만 갱신되고, 기존에 저장돼 있던 다른 콘텐츠 구매기록은 유지됨
+        // 콘텐츠명에 '.'이 포함된 경우 Firestore가 하위 필드 구분자로 오해석하지 않도록 백틱으로 이스케이프
         Object.entries(s.bought).forEach(([cname, val]) => {
-          updates[`bought.${cname}`] = val;
+          const safeKey = cname.includes('.') ? '`' + cname.replace(/`/g, '\\`') + '`' : cname;
+          updates[`bought.${safeKey}`] = val;
         });
         batch.set(ref, updates, { merge: true });
       });
